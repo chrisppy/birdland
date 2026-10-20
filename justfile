@@ -38,3 +38,7 @@ dev:
 
 # Build and check
 verify: fmt-check check build
+
+# Remove local Nix build artifacts
+clean:
+    rm -f result result-*

@@ -56,10 +56,10 @@ PanelWindow {
                 rightMargin: 25
             }
             spacing: 10
-            Loader {
-                active: true
-                sourceComponent: Power {}
-            }
+            // Loader {
+            //     active: true
+            //     sourceComponent: Power {}
+            // }
             Loader {
                 active: true
                 sourceComponent: Clock {}

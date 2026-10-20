@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -40,6 +40,7 @@ Rectangle {
                 model: niri.workspaces
 
                 Rectangle {
+                    required property int index
                     required property var modelData
 
                     visible: index < 11
@@ -47,7 +48,7 @@ Rectangle {
                     Layout.preferredHeight: 15
 
                     radius: 10
-                    color: modelData.isActive ? Theme.base00 : Theme.base02
+                    color: modelData.isActive ? Theme.base12 : Theme.base02
 
                     MouseArea {
                         anchors.fill: parent

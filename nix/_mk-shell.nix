@@ -41,6 +41,16 @@ let
     cp ${themeQml} "$out/Theme.qml"
     cp ${fontsQml} "$out/Fonts.qml"
   '';
+
+  desktopEntry = pkgs.writeText "org.quickshell.desktop" ''
+    [Desktop Entry]
+    Version=1.5
+    Type=Application
+    Name=Quickshell
+    NoDisplay=true
+    Exec=${placeholder "out"}/bin/shell
+    Icon=org.quickshell
+  '';
 in
 pkgs.stdenvNoCC.mkDerivation {
   pname = "shell";
@@ -53,18 +63,27 @@ pkgs.stdenvNoCC.mkDerivation {
   ];
 
   installPhase = ''
-    runHook preInstall
+      runHook preInstall
 
-    install -d "$out/bin"
-    install -d "$out/share/quickshell/shell"
+      install -d "$out/bin"
+      install -d "$out/share/quickshell/shell"
+      install -d "$out/share/applications"
+      install -d "$out/share/icons/hicolor/scalable/apps"
 
-    cp -r ${qmlFiles}/. "$out/share/quickshell/shell/"
+      cp -r ${qmlFiles}/. "$out/share/quickshell/shell/"
 
-    makeWrapper ${lib.getExe quickshell} "$out/bin/shell" \
-      --add-flags "--path" \
-      --add-flags "$out/share/quickshell/shell/shell.qml"
+        install -Dm644 ${desktopEntry} \
+    "$out/share/applications/org.quickshell.desktop"
 
-    runHook postInstall
+      install -Dm644 \
+        ${quickshell}/share/icons/hicolor/scalable/apps/org.quickshell.svg \
+        "$out/share/icons/hicolor/scalable/apps/org.quickshell.svg"
+
+      makeWrapper ${lib.getExe quickshell} "$out/bin/shell" \
+        --add-flags "--path" \
+        --add-flags "$out/share/quickshell/shell/shell.qml"
+
+      runHook postInstall
   '';
 
   meta = {

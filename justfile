@@ -4,13 +4,17 @@ set dotenv-load := false
 default:
     @just --list
 
-# Build the shell package
+# Build the Birdland suite package
 build:
-    nix build .#shell
+    nix build .#birdland
 
-# Run the shell package
-run:
-    nix run .#shell
+# Run the Bullpen status bar
+run-bullpen:
+    nix run .#bullpen
+
+# Run the Dugout app launcher
+run-dugout:
+    nix run .#dugout
 
 # Check flake outputs and evaluation
 check:

@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: GPL-3.0-only
+{ self, inputs, ... }: {
+  flake = {
+    homeManagerModules.default =
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
+      let
+        cfg = config.programs.birdland;
+        system = pkgs.stdenv.hostPlatform.system;
+        birdlandPkgs = self.packages.${system};
+
+        base24Lib = inputs.base24-themes.lib.${system} or inputs.base24-themes.lib;
+        qmlThemeText = base24Lib.toQml cfg.theme.scheme;
+      in
+      {
+        options.programs.birdland = {
+          enable = lib.mkEnableOption "Birdland Quickshell Suite";
+
+          theme = {
+            scheme = lib.mkOption {
+              type = lib.types.either lib.types.str lib.types.attrs;
+              default = "birdland";
+              description = "Base24 color scheme name or custom attribute set.";
+            };
+          };
+
+          font = {
+            family = lib.mkOption {
+              type = lib.types.str;
+              default = "Inter";
+              description = "Default font family for Birdland apps.";
+            };
+            package = lib.mkOption {
+              type = lib.types.nullOr lib.types.package;
+              default = pkgs.inter;
+              description = "Nix package for the font.";
+            };
+          };
+
+          bullpen = {
+            enable = lib.mkEnableOption "Bullpen status bar";
+            systemd.enable = lib.mkEnableOption "systemd user service for Bullpen";
+          };
+
+          dugout = {
+            enable = lib.mkEnableOption "Dugout app launcher";
+          };
+        };
+
+        config = lib.mkIf cfg.enable {
+          home.packages =
+            (lib.optional cfg.bullpen.enable birdlandPkgs.bullpen)
+            ++ (lib.optional cfg.dugout.enable birdlandPkgs.dugout)
+            ++ (lib.optional (cfg.font.package != null) cfg.font.package);
+
+          fonts.fontconfig.enable = true;
+
+          xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
+
+          systemd.user.services.bullpen = lib.mkIf (cfg.bullpen.enable && cfg.bullpen.systemd.enable) {
+            Unit = {
+              Description = "Bullpen Status Bar for Niri";
+              PartOf = [ "graphical-session.target" ];
+              After = [ "graphical-session.target" ];
+            };
+            Service = {
+              ExecStart = "${birdlandPkgs.bullpen}/bin/bullpen";
+              Restart = "always";
+            };
+            Install = {
+              WantedBy = [ "graphical-session.target" ];
+            };
+          };
+        };
+      };
+  };
+}

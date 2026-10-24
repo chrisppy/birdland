@@ -2,28 +2,32 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "../.."
+import modules.theme
 
 PanelWindow {
     id: bar
+    implicitHeight: 30
+    color: Theme.background
+
     anchors {
         top: true
         left: true
         right: true
     }
-    implicitHeight: 30
-    color: "transparent"
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.base00
+        color: Theme.background
         bottomLeftRadius: 20
         bottomRightRadius: 20
+        border.color: Theme.border
+        border.width: 1
+
         // left
         RowLayout {
             anchors {
                 left: parent.left
-                leftMargin: 25
+                leftMargin: Theme.spacingMedium
             }
             Loader {
                 active: true
@@ -41,10 +45,10 @@ PanelWindow {
                 text: niri.focusedWindow?.title ?? ""
                 font {
                     family: Fonts.family
-                    pixelSize: Fonts.size + 4
+                    pixelSize: Fonts.size
                 }
 
-                color: Theme.base04
+                color: Theme.textBright
                 elide: Text.ElideRight
             }
         }
@@ -53,13 +57,9 @@ PanelWindow {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
-                rightMargin: 25
+                rightMargin: Theme.spacingMedium
             }
-            spacing: 10
-            // Loader {
-            //     active: true
-            //     sourceComponent: Power {}
-            // }
+            spacing: Theme.spacingMedium
             Loader {
                 active: true
                 sourceComponent: Clock {}

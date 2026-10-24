@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Niri
-import "./modules/bar/"
 
 ShellRoot {
     id: root

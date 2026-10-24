@@ -2,19 +2,19 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "../.."
+import modules.theme
 
 Rectangle {
     id: root
 
     anchors.left: parent.left
 
-    color: Theme.base03
+    color: Theme.surfaceAlt
     height: 25
     width: 215
 
-    bottomLeftRadius: 10
-    bottomRightRadius: 10
+    bottomLeftRadius: Theme.radiusMedium
+    bottomRightRadius: Theme.radiusMedium
 
     Rectangle {
         id: workspaceLayout
@@ -23,18 +23,18 @@ Rectangle {
             verticalCenter: parent.verticalCenter
             left: parent.left
             right: parent.right
-            leftMargin: 10
-            rightMargin: 10
+            leftMargin: Theme.spacingMedium
+            rightMargin: Theme.spacingMedium
         }
 
-        color: "transparent"
+        color: Theme.surfaceAlt
         implicitHeight: workspaceRow.implicitHeight
 
         RowLayout {
             id: workspaceRow
 
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 5
+            spacing: Theme.spacingSmall
 
             Repeater {
                 model: niri.workspaces
@@ -47,8 +47,8 @@ Rectangle {
                     Layout.preferredWidth: 15
                     Layout.preferredHeight: 15
 
-                    radius: 10
-                    color: modelData.isActive ? Theme.base12 : Theme.base02
+                    radius: Theme.radiusLarge
+                    color: modelData.isActive ? Theme.activeWorkspace : Theme.inactiveWorkspace
 
                     MouseArea {
                         anchors.fill: parent

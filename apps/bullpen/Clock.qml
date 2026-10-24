@@ -2,31 +2,32 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "../.."
+import modules.theme
 
 Rectangle {
     id: root
 
     implicitWidth: timeBlock.implicitWidth
     implicitHeight: timeBlock.implicitHeight
-    color: "transparent"
+    color: Theme.background
 
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
     }
 
+    
     Text {
         id: timeBlock
-
-        anchors.verticalCenter: parent.verticalCenter
-
-        text: Qt.formatDateTime(clock.date, "hh:mm dd MMM, yyyy")
-        color: Theme.base05
-
+        
+        color: Theme.textBright
         font {
             family: Fonts.family
             pixelSize: Fonts.size
         }
+
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: Qt.formatDateTime(clock.date, "hh:mm dd MMM, yyyy")
     }
 }

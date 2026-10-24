@@ -1,0 +1,3 @@
+singleton Fonts 1.0 Fonts.qml
+singleton Theme 1.0 Theme.qml
+singleton Base24Colors 1.0 Base24Colors.qml

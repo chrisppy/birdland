@@ -48,6 +48,7 @@
 
           dugout = {
             enable = lib.mkEnableOption "Dugout app launcher";
+            systemd.enable = lib.mkEnableOption "systemd user service for Dugout";
           };
         };
 
@@ -69,6 +70,21 @@
             };
             Service = {
               ExecStart = "${birdlandPkgs.bullpen}/bin/bullpen";
+              Restart = "always";
+            };
+            Install = {
+              WantedBy = [ "graphical-session.target" ];
+            };
+          };
+
+          systemd.user.services.dugout = lib.mkIf (cfg.dugout.enable && cfg.dugout.systemd.enable) {
+            Unit = {
+              Description = "Dugout App Launcher for Niri";
+              PartOf = [ "graphical-session.target" ];
+              After = [ "graphical-session.target" ];
+            };
+            Service = {
+              ExecStart = "${birdlandPkgs.dugout}/bin/birdland-dugout";
               Restart = "always";
             };
             Install = {

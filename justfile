@@ -12,9 +12,13 @@ build:
 run-bullpen:
     nix run .#bullpen
 
-# Run the Dugout app launcher
+# Run the Dugout app launcher (starts hidden)
 run-dugout:
     nix run .#dugout
+
+# Toggle a running Dugout
+toggle-dugout:
+    nix run .#dugout -- ipc call dugout toggle
 
 # Check flake outputs and evaluation
 check:

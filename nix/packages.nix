@@ -65,12 +65,16 @@
         dugout = mkApp {
           name = "dugout";
         };
+        lineup = mkApp {
+          name = "lineup";
+        };
 
         birdland = pkgs.symlinkJoin {
           name = "birdland-suite";
           paths = [
             bullpen
             dugout
+            lineup
           ];
         };
 

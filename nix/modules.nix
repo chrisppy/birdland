@@ -55,20 +55,42 @@
             enable = lib.mkEnableOption "Dugout app launcher";
             systemd.enable = lib.mkEnableOption "systemd user service for Dugout";
           };
+
+          lineup = {
+            enable = lib.mkEnableOption "Lineup favorite apps dock";
+            systemd.enable = lib.mkEnableOption "systemd user service for Lineup";
+            favorites = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              example = [ "firefox" "foot" ];
+              description = "Desktop entry IDs (file name without .desktop) of the apps to show, in order.";
+            };
+            position = lib.mkOption {
+              type = lib.types.enum [ "top" "bottom" "left" "right" ];
+              default = "bottom";
+              description = "Screen edge the Lineup dock is attached to.";
+            };
+          };
         };
 
         config = lib.mkIf cfg.enable {
           home.packages =
             (lib.optional cfg.bullpen.enable birdlandPkgs.bullpen)
             ++ (lib.optional cfg.dugout.enable birdlandPkgs.dugout)
+            ++ (lib.optional cfg.lineup.enable birdlandPkgs.lineup)
             ++ (lib.optional (cfg.font.package != null) cfg.font.package);
 
           fonts.fontconfig.enable = true;
 
-          # Bullpen reads its position from this variable (see apps/bullpen/Bar.qml).
-          home.sessionVariables = lib.mkIf cfg.bullpen.enable {
-            BULLPEN_POSITION = cfg.bullpen.position;
-          };
+          # Apps read their settings from these variables (see apps/*/).
+          home.sessionVariables =
+            (lib.optionalAttrs cfg.bullpen.enable {
+              BULLPEN_POSITION = cfg.bullpen.position;
+            })
+            // (lib.optionalAttrs cfg.lineup.enable {
+              LINEUP_POSITION = cfg.lineup.position;
+              LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
+            });
 
           xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
 
@@ -96,6 +118,25 @@
             };
             Service = {
               ExecStart = "${birdlandPkgs.dugout}/bin/birdland-dugout";
+              Restart = "always";
+            };
+            Install = {
+              WantedBy = [ "graphical-session.target" ];
+            };
+          };
+
+          systemd.user.services.lineup = lib.mkIf (cfg.lineup.enable && cfg.lineup.systemd.enable) {
+            Unit = {
+              Description = "Lineup Favorite Apps Dock for Niri";
+              PartOf = [ "graphical-session.target" ];
+              After = [ "graphical-session.target" ];
+            };
+            Service = {
+              ExecStart = "${birdlandPkgs.lineup}/bin/birdland-lineup";
+              Environment = [
+                "LINEUP_POSITION=${cfg.lineup.position}"
+                "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
+              ];
               Restart = "always";
             };
             Install = {

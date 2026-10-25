@@ -20,6 +20,10 @@ run-dugout:
 toggle-dugout:
     nix run .#dugout -- ipc call dugout toggle
 
+# Run the Lineup favorite apps dock (e.g. LINEUP_FAVORITES=firefox,foot just run-lineup)
+run-lineup:
+    nix run .#lineup
+
 # Check flake outputs and evaluation
 check:
     nix flake check

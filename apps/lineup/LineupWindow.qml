@@ -41,12 +41,12 @@ PanelWindow {
                 continue;
 
             found.push(DesktopEntries.byId(appId) ?? DesktopEntries.heuristicLookup(appId) ?? ({
-                        id: appId,
-                        name: appId,
-                        icon: appId,
-                        startupClass: "",
-                        execute: () => {}
-                    }));
+                    id: appId,
+                    name: appId,
+                    icon: appId,
+                    startupClass: "",
+                    execute: () => {}
+                }));
         }
         return found;
     }

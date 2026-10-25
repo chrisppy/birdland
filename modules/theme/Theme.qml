@@ -8,7 +8,7 @@ QtObject {
     readonly property int spacingSmall: 4
     readonly property int spacingMedium: 8
     readonly property int spacingLarge: 16
-    
+
     readonly property int radiusSmall: 4
     readonly property int radiusMedium: 8
     readonly property int radiusLarge: 16

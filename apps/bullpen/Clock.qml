@@ -19,10 +19,9 @@ Rectangle {
         precision: SystemClock.Seconds
     }
 
-    
     Text {
         id: timeBlock
-        
+
         color: Theme.textBright
         font {
             family: Fonts.family

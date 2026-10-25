@@ -19,6 +19,7 @@
       {
         options.programs.birdland = {
           enable = lib.mkEnableOption "Birdland Quickshell Suite";
+          systemd.enable = lib.mkEnableOption "systemd user services for Birdland apps";
 
           theme = {
             scheme = lib.mkOption {
@@ -43,9 +44,13 @@
 
           bullpen = {
             enable = lib.mkEnableOption "Bullpen status bar";
-            systemd.enable = lib.mkEnableOption "systemd user service for Bullpen";
             position = lib.mkOption {
-              type = lib.types.enum [ "top" "bottom" "left" "right" ];
+              type = lib.types.enum [
+                "top"
+                "bottom"
+                "left"
+                "right"
+              ];
               default = "top";
               description = "Screen edge the Bullpen bar is attached to.";
             };
@@ -53,20 +58,26 @@
 
           dugout = {
             enable = lib.mkEnableOption "Dugout app launcher";
-            systemd.enable = lib.mkEnableOption "systemd user service for Dugout";
           };
 
           lineup = {
             enable = lib.mkEnableOption "Lineup favorite apps dock";
-            systemd.enable = lib.mkEnableOption "systemd user service for Lineup";
             favorites = lib.mkOption {
               type = lib.types.listOf lib.types.str;
               default = [ ];
-              example = [ "firefox" "foot" ];
+              example = [
+                "firefox"
+                "foot"
+              ];
               description = "Desktop entry IDs (file name without .desktop) of the apps to show, in order.";
             };
             position = lib.mkOption {
-              type = lib.types.enum [ "top" "bottom" "left" "right" ];
+              type = lib.types.enum [
+                "top"
+                "bottom"
+                "left"
+                "right"
+              ];
               default = "bottom";
               description = "Screen edge the Lineup dock is attached to.";
             };
@@ -94,53 +105,48 @@
 
           xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
 
-          systemd.user.services.bullpen = lib.mkIf (cfg.bullpen.enable && cfg.bullpen.systemd.enable) {
-            Unit = {
-              Description = "Bullpen Status Bar for Niri";
-              PartOf = [ "graphical-session.target" ];
-              After = [ "graphical-session.target" ];
+          systemd.user.services = lib.mkIf cfg.systemd.enable {
+            bullpen = lib.mkIf cfg.bullpen.enable {
+              Unit = {
+                Description = "Bullpen Status Bar for Niri";
+                PartOf = [ "graphical-session.target" ];
+                After = [ "graphical-session.target" ];
+              };
+              Service = {
+                ExecStart = "${birdlandPkgs.bullpen}/bin/birdland-bullpen";
+                Environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
+                Restart = "always";
+              };
+              Install.WantedBy = [ "graphical-session.target" ];
             };
-            Service = {
-              ExecStart = "${birdlandPkgs.bullpen}/bin/birdland-bullpen";
-              Environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
-              Restart = "always";
+            dugout = lib.mkIf cfg.dugout.enable {
+              Unit = {
+                Description = "Dugout App Launcher for Niri";
+                PartOf = [ "graphical-session.target" ];
+                After = [ "graphical-session.target" ];
+              };
+              Service = {
+                ExecStart = "${birdlandPkgs.dugout}/bin/birdland-dugout";
+                Restart = "always";
+              };
+              Install.WantedBy = [ "graphical-session.target" ];
             };
-            Install = {
-              WantedBy = [ "graphical-session.target" ];
-            };
-          };
 
-          systemd.user.services.dugout = lib.mkIf (cfg.dugout.enable && cfg.dugout.systemd.enable) {
-            Unit = {
-              Description = "Dugout App Launcher for Niri";
-              PartOf = [ "graphical-session.target" ];
-              After = [ "graphical-session.target" ];
-            };
-            Service = {
-              ExecStart = "${birdlandPkgs.dugout}/bin/birdland-dugout";
-              Restart = "always";
-            };
-            Install = {
-              WantedBy = [ "graphical-session.target" ];
-            };
-          };
-
-          systemd.user.services.lineup = lib.mkIf (cfg.lineup.enable && cfg.lineup.systemd.enable) {
-            Unit = {
-              Description = "Lineup Favorite Apps Dock for Niri";
-              PartOf = [ "graphical-session.target" ];
-              After = [ "graphical-session.target" ];
-            };
-            Service = {
-              ExecStart = "${birdlandPkgs.lineup}/bin/birdland-lineup";
-              Environment = [
-                "LINEUP_POSITION=${cfg.lineup.position}"
-                "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
-              ];
-              Restart = "always";
-            };
-            Install = {
-              WantedBy = [ "graphical-session.target" ];
+            lineup = lib.mkIf cfg.lineup.enable {
+              Unit = {
+                Description = "Lineup Favorite Apps Dock for Niri";
+                PartOf = [ "graphical-session.target" ];
+                After = [ "graphical-session.target" ];
+              };
+              Service = {
+                ExecStart = "${birdlandPkgs.lineup}/bin/birdland-lineup";
+                Environment = [
+                  "LINEUP_POSITION=${cfg.lineup.position}"
+                  "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
+                ];
+                Restart = "always";
+              };
+              Install.WantedBy = [ "graphical-session.target" ];
             };
           };
         };

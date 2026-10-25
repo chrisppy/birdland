@@ -1,12 +1,17 @@
 # SPDX-License-Identifier: GPL-3.0-only
 { inputs, ... }: {
   perSystem =
-    { pkgs, system, ... }:
+    {
+      pkgs,
+      system,
+      lib,
+      ...
+    }:
     let
       qsPkg = inputs.quickshell.packages.${system}.default;
       niriPlugin = inputs.qml-niri.packages.${system}.default;
       base24Lib = inputs.base24-themes.lib.base24;
-      defaultQmlTheme = base24Lib.toQml inputs.base24-themes.themes.camden;
+      defaultQmlTheme = base24Lib.toQml inputs.base24-themes.themes.birdland;
 
       mkApp =
         {
@@ -51,7 +56,7 @@
             cat <<EOF > $out/bin/${binName}
             #!/usr/bin/env bash
             export QML2_IMPORT_PATH="${niriPlugin}/lib/qt-6/qml:$out/share/birdland''${QML2_IMPORT_PATH:+:\$QML2_IMPORT_PATH}"
-            exec ${qsPkg}/bin/quickshell -p "$out/share/birdland/${name}" "\$@"
+            exec ${lib.getExe qsPkg} -p "$out/share/birdland/${name}" "\$@"
             EOF
             chmod +x $out/bin/${binName}
           '';

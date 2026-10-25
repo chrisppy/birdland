@@ -14,7 +14,78 @@
         birdlandPkgs = self.packages.${system};
 
         base24Lib = inputs.base24-themes.lib.${system} or inputs.base24-themes.lib;
-        qmlThemeText = base24Lib.toQml cfg.theme.scheme;
+        resolvedScheme =
+          if builtins.isString cfg.theme.scheme then
+            inputs.base24-themes.themes.${cfg.theme.scheme}
+          else
+            cfg.theme.scheme;
+
+        qmlThemeText = base24Lib.toQml resolvedScheme;
+
+        apps = {
+          bullpen = {
+            enabled = cfg.bullpen.enable;
+            description = "Bullpen Status Bar for Niri";
+            extraOptions = {
+              position = lib.mkOption {
+                type = lib.types.enum [
+                  "top"
+                  "bottom"
+                  "left"
+                  "right"
+                ];
+                default = "top";
+                description = "Screen edge the Bullpen bar is attached to.";
+              };
+            };
+            environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
+            sessionVariables = {
+              BULLPEN_POSITION = cfg.bullpen.position;
+            };
+          };
+          dugout = {
+            enabled = cfg.dugout.enable;
+            description = "Dugout App Launcher for Niri";
+            extraOptions = { };
+            environment = [ ];
+            sessionVariables = { };
+          };
+          lineup = {
+            enabled = cfg.lineup.enable;
+            description = "Lineup Favorite Apps Dock for Niri";
+            extraOptions = {
+              favorites = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                example = [
+                  "firefox"
+                  "foot"
+                ];
+                description = "Desktop entry IDs of the apps to show, in order.";
+              };
+              position = lib.mkOption {
+                type = lib.types.enum [
+                  "top"
+                  "bottom"
+                  "left"
+                  "right"
+                ];
+                default = "bottom";
+                description = "Screen edge the Lineup dock is attached to.";
+              };
+            };
+            environment = [
+              "LINEUP_POSITION=${cfg.lineup.position}"
+              "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
+            ];
+            sessionVariables = {
+              LINEUP_POSITION = cfg.lineup.position;
+              LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
+            };
+          };
+        };
+
+        enabledApps = lib.filterAttrs (name: _: cfg.${name}.enable) apps;
       in
       {
         options.programs.birdland = {
@@ -41,114 +112,48 @@
               description = "Nix package for the font.";
             };
           };
-
-          bullpen = {
-            enable = lib.mkEnableOption "Bullpen status bar";
-            position = lib.mkOption {
-              type = lib.types.enum [
-                "top"
-                "bottom"
-                "left"
-                "right"
-              ];
-              default = "top";
-              description = "Screen edge the Bullpen bar is attached to.";
-            };
-          };
-
-          dugout = {
-            enable = lib.mkEnableOption "Dugout app launcher";
-          };
-
-          lineup = {
-            enable = lib.mkEnableOption "Lineup favorite apps dock";
-            favorites = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = [ ];
-              example = [
-                "firefox"
-                "foot"
-              ];
-              description = "Desktop entry IDs (file name without .desktop) of the apps to show, in order.";
-            };
-            position = lib.mkOption {
-              type = lib.types.enum [
-                "top"
-                "bottom"
-                "left"
-                "right"
-              ];
-              default = "bottom";
-              description = "Screen edge the Lineup dock is attached to.";
-            };
-          };
-        };
+        }
+        // lib.mapAttrs (
+          _: app:
+          {
+            enable = lib.mkEnableOption app.description;
+          }
+          // app.extraOptions
+        ) apps;
 
         config = lib.mkIf cfg.enable {
-          home.packages =
-            (lib.optional cfg.bullpen.enable birdlandPkgs.bullpen)
-            ++ (lib.optional cfg.dugout.enable birdlandPkgs.dugout)
-            ++ (lib.optional cfg.lineup.enable birdlandPkgs.lineup)
-            ++ (lib.optional (cfg.font.package != null) cfg.font.package);
+          home = {
+            packages =
+              (map (name: birdlandPkgs.${name}) (lib.attrNames enabledApps))
+              ++ (lib.optional (cfg.font.package != null) cfg.font.package);
+
+            sessionVariables = lib.foldl' (acc: app: acc // app.sessionVariables) { } (
+              lib.attrValues enabledApps
+            );
+          };
 
           fonts.fontconfig.enable = true;
 
-          # Apps read their settings from these variables (see apps/*/).
-          home.sessionVariables =
-            (lib.optionalAttrs cfg.bullpen.enable {
-              BULLPEN_POSITION = cfg.bullpen.position;
-            })
-            // (lib.optionalAttrs cfg.lineup.enable {
-              LINEUP_POSITION = cfg.lineup.position;
-              LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
-            });
-
           xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
 
-          systemd.user.services = lib.mkIf cfg.systemd.enable {
-            bullpen = lib.mkIf cfg.bullpen.enable {
-              Unit = {
-                Description = "Bullpen Status Bar for Niri";
-                PartOf = [ "graphical-session.target" ];
-                After = [ "graphical-session.target" ];
-              };
-              Service = {
-                ExecStart = "${birdlandPkgs.bullpen}/bin/birdland-bullpen";
-                Environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
-                Restart = "always";
-              };
-              Install.WantedBy = [ "graphical-session.target" ];
-            };
-            dugout = lib.mkIf cfg.dugout.enable {
-              Unit = {
-                Description = "Dugout App Launcher for Niri";
-                PartOf = [ "graphical-session.target" ];
-                After = [ "graphical-session.target" ];
-              };
-              Service = {
-                ExecStart = "${birdlandPkgs.dugout}/bin/birdland-dugout";
-                Restart = "always";
-              };
-              Install.WantedBy = [ "graphical-session.target" ];
-            };
-
-            lineup = lib.mkIf cfg.lineup.enable {
-              Unit = {
-                Description = "Lineup Favorite Apps Dock for Niri";
-                PartOf = [ "graphical-session.target" ];
-                After = [ "graphical-session.target" ];
-              };
-              Service = {
-                ExecStart = "${birdlandPkgs.lineup}/bin/birdland-lineup";
-                Environment = [
-                  "LINEUP_POSITION=${cfg.lineup.position}"
-                  "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
-                ];
-                Restart = "always";
-              };
-              Install.WantedBy = [ "graphical-session.target" ];
-            };
-          };
+          systemd.user.services = lib.mkIf cfg.systemd.enable (
+            lib.mapAttrs' (
+              name: app:
+              lib.nameValuePair name {
+                Unit = {
+                  Description = app.description;
+                  PartOf = [ "graphical-session.target" ];
+                  After = [ "graphical-session.target" ];
+                };
+                Service = {
+                  ExecStart = lib.getExe' birdlandPkgs.${name} "birdland-${name}";
+                  Environment = app.environment;
+                  Restart = "always";
+                };
+                Install.WantedBy = [ "graphical-session.target" ];
+              }
+            ) enabledApps
+          );
         };
       };
   };

@@ -9,25 +9,15 @@ Item {
     id: root
 
     required property var entry
+    // Decides if a window's app ID belongs to an entry: (entry, appId) => bool.
+    required property var matcher
     property string edge: "bottom"
     readonly property bool vertical: edge === "left" || edge === "right"
 
     // Open windows that belong to this app.
-    readonly property var windows: ToplevelManager.toplevels.values.filter(t => matches(t.appId))
+    readonly property var windows: ToplevelManager.toplevels.values.filter(t => matcher(entry, t.appId))
     readonly property bool running: windows.length > 0
     readonly property bool focused: windows.some(t => t.activated)
-
-    // Window app IDs don't always equal the desktop entry ID (for example
-    // "firefox" vs "org.mozilla.firefox"), so compare a few ways.
-    function matches(appId) {
-        const app = appId.toLowerCase();
-        if (app === "")
-            return false;
-
-        const id = entry.id.toLowerCase();
-        const wmClass = entry.startupClass.toLowerCase();
-        return app === id || (wmClass !== "" && app === wmClass) || id.endsWith("." + app) || app.endsWith("." + id);
-    }
 
     // Launch the app if it isn't running, otherwise focus its next window.
     function activate() {

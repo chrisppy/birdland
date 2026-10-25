@@ -2,7 +2,7 @@
 import QtQuick
 import Quickshell
 
-// Lineup: a dock of favorite apps. Runs as its own Quickshell instance.
+// Lineup: a dock of favorite and running apps. Runs as its own Quickshell instance.
 ShellRoot {
     LazyLoader {
         active: true

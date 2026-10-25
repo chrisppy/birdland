@@ -36,8 +36,10 @@ Rectangle {
         spacing: Theme.spacingMedium + 4
 
         IconImage {
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 28
+            // implicitSize must be set: IconImage loads at its own size, and a
+            // size of 0 makes Qt render large SVGs at their natural size.
+            implicitSize: 28
+            asynchronous: true
             source: Quickshell.iconPath(root.app.icon, "application-x-executable")
         }
 

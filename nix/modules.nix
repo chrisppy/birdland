@@ -44,6 +44,11 @@
           bullpen = {
             enable = lib.mkEnableOption "Bullpen status bar";
             systemd.enable = lib.mkEnableOption "systemd user service for Bullpen";
+            position = lib.mkOption {
+              type = lib.types.enum [ "top" "bottom" "left" "right" ];
+              default = "top";
+              description = "Screen edge the Bullpen bar is attached to.";
+            };
           };
 
           dugout = {
@@ -60,6 +65,11 @@
 
           fonts.fontconfig.enable = true;
 
+          # Bullpen reads its position from this variable (see apps/bullpen/Bar.qml).
+          home.sessionVariables = lib.mkIf cfg.bullpen.enable {
+            BULLPEN_POSITION = cfg.bullpen.position;
+          };
+
           xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
 
           systemd.user.services.bullpen = lib.mkIf (cfg.bullpen.enable && cfg.bullpen.systemd.enable) {
@@ -69,7 +79,8 @@
               After = [ "graphical-session.target" ];
             };
             Service = {
-              ExecStart = "${birdlandPkgs.bullpen}/bin/bullpen";
+              ExecStart = "${birdlandPkgs.bullpen}/bin/birdland-bullpen";
+              Environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
               Restart = "always";
             };
             Install = {

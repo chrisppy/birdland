@@ -7,6 +7,9 @@ import modules.theme
 Rectangle {
     id: root
 
+    // Stack the time and date on side bars, where there is no room for one line.
+    property bool vertical: false
+
     implicitWidth: timeBlock.implicitWidth
     implicitHeight: timeBlock.implicitHeight
     color: Theme.background
@@ -26,8 +29,9 @@ Rectangle {
             pixelSize: Fonts.size
         }
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
 
-        text: Qt.formatDateTime(clock.date, "hh:mm dd MMM, yyyy")
+        text: Qt.formatDateTime(clock.date, root.vertical ? "hh\nmm\n\ndd\nMMM" : "hh:mm dd MMM, yyyy")
     }
 }

@@ -117,6 +117,22 @@ back to Base16 ones. See
 [base24-themes](https://github.com/chrisppy/base24-themes#defining-your-own-theme)
 for the format.
 
+## Development
+
+The dev shell can run any app straight from the checkout, and Quickshell
+reloads it as you edit:
+
+```sh
+just dev                               # enter the dev shell
+qs -p apps/bullpen                     # run an app
+BULLPEN_POSITION=left qs -p apps/bullpen
+LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
+```
+
+Entering the shell generates the default theme into
+`modules/theme/Base24Colors.qml` (gitignored) and puts the repo root on
+`QML2_IMPORT_PATH`, so `import modules.theme` resolves.
+
 ## License
 
 This project is licensed under the **GPL-3.0-only** license. See the

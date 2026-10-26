@@ -12,6 +12,7 @@ QtObject {
     readonly property int radiusSmall: 4
     readonly property int radiusMedium: 8
     readonly property int radiusLarge: 16
+    readonly property int radiusXLarge: 20
 
     readonly property color background: Base24Colors.base00
     readonly property color backgroundAlt: Base24Colors.base01

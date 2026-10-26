@@ -1,10 +1,9 @@
-# SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import modules.theme
 
-Rectangle {
+Item {
     id: root
 
     // Stack the time and date on side bars, where there is no room for one line.
@@ -12,11 +11,11 @@ Rectangle {
 
     implicitWidth: timeBlock.implicitWidth
     implicitHeight: timeBlock.implicitHeight
-    color: Theme.background
 
+    // Minutes are the smallest unit shown, so don't wake up every second.
     SystemClock {
         id: clock
-        precision: SystemClock.Seconds
+        precision: SystemClock.Minutes
     }
 
     Text {

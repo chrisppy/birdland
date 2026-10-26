@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
-import QtQuick.Layouts
-import Quickshell
 import modules.theme
 
 Rectangle {
@@ -12,9 +10,15 @@ Rectangle {
     property string edge: "top"
     readonly property bool vertical: edge === "left" || edge === "right"
 
+    // The pill always has room for maxDots workspace dots.
+    readonly property int maxDots: 11
+    readonly property int dotSize: 15
+    readonly property int thickness: 25
+    readonly property int length: maxDots * dotSize + (maxDots - 1) * Theme.spacingSmall + 2 * Theme.spacingMedium
+
     color: Theme.surfaceAlt
-    implicitWidth: vertical ? 25 : 215
-    implicitHeight: vertical ? 215 : 25
+    implicitWidth: vertical ? thickness : length
+    implicitHeight: vertical ? length : thickness
 
     topLeftRadius: edge === "bottom" || edge === "right" ? Theme.radiusMedium : 0
     topRightRadius: edge === "bottom" || edge === "left" ? Theme.radiusMedium : 0
@@ -41,11 +45,11 @@ Rectangle {
                 required property int index
                 required property var modelData
 
-                visible: index < 11
-                width: 15
-                height: 15
+                visible: index < root.maxDots
+                width: root.dotSize
+                height: root.dotSize
 
-                radius: Theme.radiusLarge
+                radius: width / 2
                 color: modelData.isActive ? Theme.activeWorkspace : Theme.inactiveWorkspace
 
                 MouseArea {

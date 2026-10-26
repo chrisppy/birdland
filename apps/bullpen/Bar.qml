@@ -1,6 +1,5 @@
-# SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import modules.theme
 
@@ -15,9 +14,13 @@ PanelWindow {
     }
     readonly property bool vertical: edge === "left" || edge === "right"
 
-    implicitWidth: vertical ? 48 : 0
-    implicitHeight: vertical ? 0 : 30
-    color: Theme.background
+    // One line of text on top/bottom bars; room for the stacked clock on the sides.
+    readonly property int thickness: vertical ? 48 : 30
+
+    implicitWidth: vertical ? thickness : 0
+    implicitHeight: vertical ? 0 : thickness
+    // Transparent, so the screen shows through the panel's rounded corners.
+    color: "transparent"
 
     anchors {
         top: edge !== "bottom"
@@ -33,17 +36,16 @@ PanelWindow {
         border.width: 1
 
         // Round the two corners on the side facing the screen.
-        topLeftRadius: bar.edge === "bottom" || bar.edge === "right" ? 20 : 0
-        topRightRadius: bar.edge === "bottom" || bar.edge === "left" ? 20 : 0
-        bottomLeftRadius: bar.edge === "top" || bar.edge === "right" ? 20 : 0
-        bottomRightRadius: bar.edge === "top" || bar.edge === "left" ? 20 : 0
+        topLeftRadius: bar.edge === "bottom" || bar.edge === "right" ? Theme.radiusXLarge : 0
+        topRightRadius: bar.edge === "bottom" || bar.edge === "left" ? Theme.radiusXLarge : 0
+        bottomLeftRadius: bar.edge === "top" || bar.edge === "right" ? Theme.radiusXLarge : 0
+        bottomRightRadius: bar.edge === "top" || bar.edge === "left" ? Theme.radiusXLarge : 0
 
         // start: workspaces, flush with the screen edge
-        Loader {
-            active: true
-            sourceComponent: Workspaces {
-                edge: bar.edge
-            }
+        Workspaces {
+            id: workspaces
+
+            edge: bar.edge
 
             anchors {
                 top: bar.edge !== "bottom" ? parent.top : undefined
@@ -54,31 +56,29 @@ PanelWindow {
                 topMargin: bar.vertical ? Theme.spacingMedium : 0
             }
         }
-        // center: focused window title (horizontal bars only)
-        RowLayout {
+
+        // center: focused window title (horizontal bars only). Its width keeps
+        // it clear of the workspaces and clock on both sides, so it stays
+        // centered and long titles are elided instead of overlapping them.
+        Text {
             visible: !bar.vertical
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
-            }
+            anchors.centerIn: parent
+            width: Math.max(0, Math.min(implicitWidth, parent.width - 2 * (Math.max(workspaces.width, clock.width) + Theme.spacingMedium + Theme.spacingLarge)))
 
-            Text {
-                text: niri.focusedWindow?.title ?? ""
-                font {
-                    family: Fonts.family
-                    pixelSize: Fonts.size
-                }
-
-                color: Theme.textBright
-                elide: Text.ElideRight
+            text: niri.focusedWindow?.title ?? ""
+            color: Theme.textBright
+            elide: Text.ElideRight
+            font {
+                family: Fonts.family
+                pixelSize: Fonts.size
             }
         }
+
         // end: clock
-        Loader {
-            active: true
-            sourceComponent: Clock {
-                vertical: bar.vertical
-            }
+        Clock {
+            id: clock
+
+            vertical: bar.vertical
 
             anchors {
                 right: bar.vertical ? undefined : parent.right

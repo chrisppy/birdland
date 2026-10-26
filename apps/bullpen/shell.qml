@@ -1,8 +1,6 @@
-# SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import Niri
 
 ShellRoot {

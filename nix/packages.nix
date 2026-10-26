@@ -10,14 +10,18 @@
     let
       qsPkg = inputs.quickshell.packages.${system}.default;
       niriPlugin = inputs.qml-niri.packages.${system}.default;
-      base24Lib = inputs.base24-themes.lib.base24;
-      defaultQmlTheme = base24Lib.toQml inputs.base24-themes.themes.birdland;
+      base24 = inputs.base24-themes.lib.base24;
 
-      mkApp =
+      # Overridable so the Home Manager module can rebuild an app with the
+      # user's theme and font: `bullpen.override { theme = ...; }`.
+      mkApp = lib.makeOverridable (
         {
           name,
           appDir ? name,
           binName ? "birdland-${name}",
+          # A Base24 theme attrset, e.g. one of base24.themes.
+          theme ? base24.themes.birdland,
+          fontFamily ? "Sans-Serif",
         }:
         pkgs.stdenv.mkDerivation {
           pname = "birdland-${name}";
@@ -46,11 +50,11 @@
 
             chmod -R +w $out/share/birdland
 
-            # Inject the generated Base24 theme into modules/theme
-            mkdir -p $out/share/birdland/modules/theme
-            cat << 'EOF' > $out/share/birdland/modules/theme/Base24Colors.qml
-            ${defaultQmlTheme}
-            EOF
+            # Inject the generated Base24 theme and the font into modules/theme
+            cp ${pkgs.writeText "Base24Colors.qml" (base24.toQml theme)} \
+              $out/share/birdland/modules/theme/Base24Colors.qml
+            substituteInPlace $out/share/birdland/modules/theme/Fonts.qml \
+              --replace-fail '"Sans-Serif"' ${lib.escapeShellArg (builtins.toJSON fontFamily)}
 
             mkdir -p $out/bin
             cat <<EOF > $out/bin/${binName}
@@ -60,7 +64,8 @@
             EOF
             chmod +x $out/bin/${binName}
           '';
-        };
+        }
+      );
     in
     {
       packages = rec {

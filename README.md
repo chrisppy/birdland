@@ -38,7 +38,7 @@ Add Birdland as an input to your `flake.nix`:
 Import the Home Manager module provided by the flake and enable the suite:
 
 ```nix
-{ inputs, ... }: {
+{ inputs, pkgs, ... }: {
   imports = [
     inputs.birdland.homeManagerModules.default
   ];
@@ -47,8 +47,8 @@ Import the Home Manager module provided by the flake and enable the suite:
     enable = true;
     systemd.enable = true; # Manages apps as graphical-session systemd services
 
-    # Choose a Base24 theme name or pass a custom attribute set
-    theme.scheme = "birdland"; 
+    # A theme bundled with base24-themes, or a custom attribute set
+    theme.scheme = "birdland";
 
     font = {
       family = "Inter";
@@ -85,7 +85,7 @@ Import the Home Manager module provided by the flake and enable the suite:
 | :--- | :--- | :--- | :--- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
-| `programs.birdland.theme.scheme` | string / attrs | `"birdland"` | Base24 color scheme name or custom attribute set. |
+| `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |
 | `programs.birdland.font.family` | string | `"Inter"` | Default font family for the apps. |
 | `programs.birdland.font.package` | package | `pkgs.inter` | Nix package for the font. |
 | `programs.birdland.bullpen.enable` | boolean | `false` | Enable the Bullpen status bar. |
@@ -99,7 +99,9 @@ Import the Home Manager module provided by the flake and enable the suite:
 
 ## Theming
 
-Birdland dynamically translates [Base24](https://github.com/tinted-theming/base24) color schemes into QML properties via `base24-themes`. The generated palette is injected directly into `modules/theme/Base24Colors.qml` during build time.
+Birdland translates [Base24](https://github.com/tinted-theming/base24) color schemes into QML properties via `base24-themes`. The generated palette is written to `modules/theme/Base24Colors.qml` at build time, so the Home Manager module rebuilds each app with your `theme.scheme` and `font.family`.
+
+A custom theme is an attribute set of `base00`–`base17`, each six hex digits without a leading `#`. Base16 themes work too; the Base24 extension colors fall back to Base16 ones. See [base24-themes](https://github.com/chrisppy/base24-themes#defining-your-own-theme) for the format.
 
 ## License
 

@@ -18,9 +18,10 @@ QtObject {
     readonly property color surface: Base24Colors.base02
     readonly property color surfaceAlt: Base24Colors.base03
     readonly property color border: Base24Colors.base04
-    readonly property color textMuted: Base24Colors.base05
-    readonly property color text: Base24Colors.base06
-    readonly property color textBright: Base24Colors.base07
+    // Base16 slots: base04 muted foreground, base05 foreground, base06 bright.
+    readonly property color textMuted: Base24Colors.base04
+    readonly property color text: Base24Colors.base05
+    readonly property color textBright: Base24Colors.base06
 
     readonly property color primary: Base24Colors.base08
     readonly property color secondary: Base24Colors.base09

@@ -13,14 +13,17 @@
         system = pkgs.stdenv.hostPlatform.system;
         birdlandPkgs = self.packages.${system};
 
-        base24Lib = inputs.base24-themes.lib.${system} or inputs.base24-themes.lib;
-        resolvedScheme =
-          if builtins.isString cfg.theme.scheme then
-            inputs.base24-themes.themes.${cfg.theme.scheme}
-          else
-            cfg.theme.scheme;
+        base24 = inputs.base24-themes.lib.base24;
+        theme =
+          if builtins.isString cfg.theme.scheme then base24.themes.${cfg.theme.scheme} else cfg.theme.scheme;
 
-        qmlThemeText = base24Lib.toQml resolvedScheme;
+        # The theme and font are baked into each app at build time.
+        appPackage =
+          name:
+          birdlandPkgs.${name}.override {
+            inherit theme;
+            fontFamily = cfg.font.family;
+          };
 
         apps = {
           bullpen = {
@@ -94,9 +97,14 @@
 
           theme = {
             scheme = lib.mkOption {
-              type = lib.types.either lib.types.str lib.types.attrs;
+              type = lib.types.either (lib.types.enum (builtins.attrNames base24.themes)) (
+                lib.types.attrsOf lib.types.str
+              );
               default = "birdland";
-              description = "Base24 color scheme name or custom attribute set.";
+              description = ''
+                Name of a theme bundled with base24-themes, or a custom Base16/Base24
+                theme: an attrset of base00–base17 as six hex digits without "#".
+              '';
             };
           };
 
@@ -124,7 +132,7 @@
         config = lib.mkIf cfg.enable {
           home = {
             packages =
-              (map (name: birdlandPkgs.${name}) (lib.attrNames enabledApps))
+              (map appPackage (lib.attrNames enabledApps))
               ++ (lib.optional (cfg.font.package != null) cfg.font.package);
 
             sessionVariables = lib.foldl' (acc: app: acc // app.sessionVariables) { } (
@@ -133,8 +141,6 @@
           };
 
           fonts.fontconfig.enable = true;
-
-          xdg.configFile."birdland/modules/theme/Base24Colors.qml".text = qmlThemeText;
 
           systemd.user.services = lib.mkIf cfg.systemd.enable (
             lib.mapAttrs' (
@@ -146,7 +152,7 @@
                   After = [ "graphical-session.target" ];
                 };
                 Service = {
-                  ExecStart = lib.getExe' birdlandPkgs.${name} "birdland-${name}";
+                  ExecStart = lib.getExe' (appPackage name) "birdland-${name}";
                   Environment = app.environment;
                   Restart = "always";
                 };

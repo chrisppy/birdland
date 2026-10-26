@@ -152,7 +152,7 @@
                   After = [ "graphical-session.target" ];
                 };
                 Service = {
-                  ExecStart = lib.getExe' (appPackage name) "birdland-${name}";
+                  ExecStart = lib.getExe (appPackage name);
                   Environment = app.environment;
                   Restart = "always";
                 };

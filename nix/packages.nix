@@ -17,37 +17,31 @@
       mkApp = lib.makeOverridable (
         {
           name,
-          appDir ? name,
-          binName ? "birdland-${name}",
           # A Base24 theme attrset, e.g. one of base24.themes.
           theme ? base24.themes.birdland,
           fontFamily ? "Sans-Serif",
         }:
-        pkgs.stdenv.mkDerivation {
+        pkgs.stdenvNoCC.mkDerivation {
           pname = "birdland-${name}";
           version = "0.1.0";
-          src = ../.;
 
-          buildInputs = [
-            qsPkg
-            niriPlugin
-            pkgs.bash
-          ];
+          # Only this app and the shared modules, so unrelated edits (other
+          # apps, README, Nix) don't rebuild it.
+          src = lib.fileset.toSource {
+            root = ../.;
+            fileset = lib.fileset.unions [
+              ../modules
+              (../apps + "/${name}")
+            ];
+          };
+          dontUnpack = true;
+
+          nativeBuildInputs = [ pkgs.makeWrapper ];
 
           installPhase = ''
             mkdir -p $out/share/birdland
-
-            # Copy the entire project structure or required directories to preserve relative paths
             cp -r $src/modules $out/share/birdland/
-            if [ -d "$src/apps/${appDir}" ]; then
-              cp -r $src/apps/${appDir} $out/share/birdland/${name}
-            elif [ -d "$src/${appDir}" ]; then
-              cp -r $src/${appDir} $out/share/birdland/${name}
-            else
-              echo "Error: Could not find source directory for ${appDir}" >&2
-              exit 1
-            fi
-
+            cp -r $src/apps/${name} $out/share/birdland/${name}
             chmod -R +w $out/share/birdland
 
             # Inject the generated Base24 theme and the font into modules/theme
@@ -56,14 +50,12 @@
             substituteInPlace $out/share/birdland/modules/theme/Fonts.qml \
               --replace-fail '"Sans-Serif"' ${lib.escapeShellArg (builtins.toJSON fontFamily)}
 
-            mkdir -p $out/bin
-            cat <<EOF > $out/bin/${binName}
-            #!/usr/bin/env bash
-            export QML2_IMPORT_PATH="${niriPlugin}/lib/qt-6/qml:$out/share/birdland''${QML2_IMPORT_PATH:+:\$QML2_IMPORT_PATH}"
-            exec ${lib.getExe qsPkg} -p "$out/share/birdland/${name}" "\$@"
-            EOF
-            chmod +x $out/bin/${binName}
+            makeWrapper ${lib.getExe qsPkg} $out/bin/birdland-${name} \
+              --prefix QML2_IMPORT_PATH : ${niriPlugin}/lib/qt-6/qml:$out/share/birdland \
+              --add-flags "-p $out/share/birdland/${name}"
           '';
+
+          meta.mainProgram = "birdland-${name}";
         }
       );
     in

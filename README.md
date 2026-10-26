@@ -1,16 +1,23 @@
 # Birdland
 
-A modular, highly customizable desktop shell suite built with [Quickshell](https://github.com/outfoxxed/quickshell) and managed entirely through Nix Flakes and Home Manager. Designed with native support for the [Niri](https://github.com/sodiboo/niri) compositor and dynamically themed via [base24-themes](https://github.com/chrisppy/base24-themes).
+A modular, highly customizable desktop shell suite built with
+[Quickshell](https://github.com/outfoxxed/quickshell) and managed entirely
+through Nix Flakes and Home Manager. Designed with native support for the
+[Niri](https://github.com/sodiboo/niri) compositor and dynamically themed via
+[base24-themes](https://github.com/chrisppy/base24-themes).
 
 ## Components
 
-Birdland is split into three core Quickshell applications, which can be used individually or as a complete suite:
+Birdland is split into three core Quickshell applications, which can be used
+individually or as a complete suite:
 
-* **`bullpen`**: A flexible status bar attachable to any screen edge (`top`, `bottom`, `left`, `right`).
-* **`dugout`**: A quick application launcher.
-* **`lineup`**: A customizable favorite apps dock for launching and managing pinned applications.
+- **`bullpen`**: A flexible status bar attachable to any screen edge (`top`,
+  `bottom`, `left`, `right`).
+- **`dugout`**: A quick application launcher.
+- **`lineup`**: A customizable favorite apps dock for launching and managing
+  pinned applications.
 
----
+______________________________________________________________________
 
 ## Installation
 
@@ -31,7 +38,7 @@ Add Birdland as an input to your `flake.nix`:
 }
 ```
 
----
+______________________________________________________________________
 
 ## Home Manager Module Usage
 
@@ -77,12 +84,12 @@ Import the Home Manager module provided by the flake and enable the suite:
 }
 ```
 
----
+______________________________________________________________________
 
 ## Configuration Options
 
 | Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
+| :----------------------------------- | :----------------- | :----------- | :----------------------------------------------------------------- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
 | `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |
@@ -95,14 +102,22 @@ Import the Home Manager module provided by the flake and enable the suite:
 | `programs.birdland.lineup.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.lineup.favorites` | list of strings | `[]` | Desktop entry IDs of pinned apps in order. |
 
----
+______________________________________________________________________
 
 ## Theming
 
-Birdland translates [Base24](https://github.com/tinted-theming/base24) color schemes into QML properties via `base24-themes`. The generated palette is written to `modules/theme/Base24Colors.qml` at build time, so the Home Manager module rebuilds each app with your `theme.scheme` and `font.family`.
+Birdland translates [Base24](https://github.com/tinted-theming/base24) color
+schemes into QML properties via `base24-themes`. The generated palette is
+written to `modules/theme/Base24Colors.qml` at build time, so the Home Manager
+module rebuilds each app with your `theme.scheme` and `font.family`.
 
-A custom theme is an attribute set of `base00`–`base17`, each six hex digits without a leading `#`. Base16 themes work too; the Base24 extension colors fall back to Base16 ones. See [base24-themes](https://github.com/chrisppy/base24-themes#defining-your-own-theme) for the format.
+A custom theme is an attribute set of `base00`–`base17`, each six hex digits
+without a leading `#`. Base16 themes work too; the Base24 extension colors fall
+back to Base16 ones. See
+[base24-themes](https://github.com/chrisppy/base24-themes#defining-your-own-theme)
+for the format.
 
 ## License
 
-This project is licensed under the **GPL-3.0-only** license. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **GPL-3.0-only** license. See the
+[LICENSE](./LICENSE) file for details.

@@ -92,7 +92,7 @@ PanelWindow {
         implicitWidth: items.implicitWidth + Theme.spacingMedium * 2
         implicitHeight: items.implicitHeight + Theme.spacingMedium * 2
 
-        radius: Theme.radiusLarge + 4
+        radius: Theme.radiusXLarge
         color: Theme.background
         border {
             width: 1

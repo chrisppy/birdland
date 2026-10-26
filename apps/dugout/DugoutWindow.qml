@@ -99,7 +99,7 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.2
 
-        radius: Theme.radiusLarge + 4
+        radius: Theme.radiusXLarge
         color: Theme.background
         border {
             width: 1

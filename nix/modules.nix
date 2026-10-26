@@ -27,7 +27,6 @@
 
         apps = {
           bullpen = {
-            enabled = cfg.bullpen.enable;
             description = "Bullpen Status Bar for Niri";
             extraOptions = {
               position = lib.mkOption {
@@ -41,20 +40,16 @@
                 description = "Screen edge the Bullpen bar is attached to.";
               };
             };
-            environment = [ "BULLPEN_POSITION=${cfg.bullpen.position}" ];
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
             };
           };
           dugout = {
-            enabled = cfg.dugout.enable;
             description = "Dugout App Launcher for Niri";
             extraOptions = { };
-            environment = [ ];
             sessionVariables = { };
           };
           lineup = {
-            enabled = cfg.lineup.enable;
             description = "Lineup Favorite Apps Dock for Niri";
             extraOptions = {
               favorites = lib.mkOption {
@@ -77,10 +72,6 @@
                 description = "Screen edge the Lineup dock is attached to.";
               };
             };
-            environment = [
-              "LINEUP_POSITION=${cfg.lineup.position}"
-              "LINEUP_FAVORITES=${lib.concatStringsSep "," cfg.lineup.favorites}"
-            ];
             sessionVariables = {
               LINEUP_POSITION = cfg.lineup.position;
               LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
@@ -153,7 +144,7 @@
                 };
                 Service = {
                   ExecStart = lib.getExe (appPackage name);
-                  Environment = app.environment;
+                  Environment = lib.mapAttrsToList (var: value: "${var}=${value}") app.sessionVariables;
                   Restart = "always";
                 };
                 Install.WantedBy = [ "graphical-session.target" ];

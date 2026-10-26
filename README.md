@@ -3,7 +3,7 @@
 A modular, highly customizable desktop shell suite built with
 [Quickshell](https://github.com/outfoxxed/quickshell) and managed entirely
 through Nix Flakes and Home Manager. Designed with native support for the
-[Niri](https://github.com/sodiboo/niri) compositor and dynamically themed via
+[Niri](https://github.com/YaLTeR/niri) compositor and dynamically themed via
 [base24-themes](https://github.com/chrisppy/base24-themes).
 
 ## Components

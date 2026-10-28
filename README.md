@@ -12,7 +12,9 @@ Birdland is split into three core Quickshell applications, which can be used
 individually or as a complete suite:
 
 - **`bullpen`**: A flexible status bar attachable to any screen edge (`top`,
-  `bottom`, `left`, `right`).
+  `bottom`, `left`, `right`), with workspaces, the focused window, a clock, and
+  status indicators for CPU, memory, GPU, temperature, weather, network, volume,
+  microphone and battery.
 - **`dugout`**: A quick application launcher.
 - **`lineup`**: A customizable favorite apps dock for launching and managing
   pinned applications.
@@ -65,6 +67,11 @@ Import the Home Manager module provided by the flake and enable the suite:
     bullpen = {
       enable = true;
       position = "top";
+      units = "imperial";
+      weather = {
+        latitude = 39.28;
+        longitude = -76.62;
+      };
     };
 
     dugout = {
@@ -97,10 +104,44 @@ ______________________________________________________________________
 | `programs.birdland.font.package` | package | `pkgs.inter` | Nix package for the font. |
 | `programs.birdland.bullpen.enable` | boolean | `false` | Enable the Bullpen status bar. |
 | `programs.birdland.bullpen.position` | enum | `"top"` | Screen edge (`top`, `bottom`, `left`, `right`). |
+| `programs.birdland.bullpen.modules` | list of enum | all | Status indicators before the clock, in order (see below). |
+| `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |
+| `programs.birdland.bullpen.weather.latitude` | number or null | `null` | Weather location; the weather is hidden until both are set. |
+| `programs.birdland.bullpen.weather.longitude` | number or null | `null` | Weather location. |
 | `programs.birdland.dugout.enable` | boolean | `false` | Enable the Dugout app launcher. |
 | `programs.birdland.lineup.enable` | boolean | `false` | Enable the Lineup favorite apps dock. |
 | `programs.birdland.lineup.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.lineup.favorites` | list of strings | `[]` | Desktop entry IDs of pinned apps in order. |
+
+______________________________________________________________________
+
+## Bullpen status indicators
+
+`bullpen.modules` picks the indicators and their order. The default is all of
+them: `cpu`, `memory`, `gpu`, `temperature`, `weather`, `network`, `volume`,
+`microphone`, `battery`. An indicator with nothing to show (no battery, no GPU
+sensor, no weather location) hides itself.
+
+| Indicator | Shows | Needs |
+| :-------------- | :------------------------------------------- | :--------------------------------------------------------------------- |
+| `cpu`, `memory` | Usage | Nothing (`/proc`) |
+| `gpu` | Usage, and temperature when available | AMD: nothing (sysfs). NVIDIA: `nvidia-smi`. Intel: not supported |
+| `temperature` | CPU temperature | A hwmon sensor: `k10temp`, `zenpower`, `coretemp`... |
+| `weather` | Current conditions from Open-Meteo | Internet access and `weather.latitude`/`longitude` |
+| `network` | Wired, or Wi-Fi signal strength | NetworkManager |
+| `volume` | Default output; click mutes, scroll changes it | PipeWire with WirePlumber |
+| `microphone` | Default input; click mutes, scroll changes it | PipeWire with WirePlumber |
+| `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |
+
+Icons come from the Symbols Nerd Font, which the Home Manager module installs.
+
+On laptops with an NVIDIA GPU and no AMD GPU, the `gpu` indicator polls
+`nvidia-smi`, which keeps the NVIDIA GPU awake. Leave `gpu` out of `modules` to
+save battery.
+
+The weather request sends only the configured coordinates to
+[Open-Meteo](https://open-meteo.com), every 15 minutes; click the indicator to
+refresh it.
 
 ______________________________________________________________________
 
@@ -126,6 +167,8 @@ it as you edit:
 just dev                               # enter the dev shell
 qs -p apps/bullpen                     # run an app
 BULLPEN_POSITION=left qs -p apps/bullpen
+BULLPEN_MODULES=cpu,volume BULLPEN_UNITS=imperial qs -p apps/bullpen
+BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
 ```
 

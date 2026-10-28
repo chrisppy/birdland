@@ -39,9 +39,69 @@
                 default = "top";
                 description = "Screen edge the Bullpen bar is attached to.";
               };
+              modules = lib.mkOption {
+                type = lib.types.listOf (
+                  lib.types.enum [
+                    "cpu"
+                    "memory"
+                    "gpu"
+                    "temperature"
+                    "weather"
+                    "network"
+                    "volume"
+                    "microphone"
+                    "battery"
+                  ]
+                );
+                default = [
+                  "cpu"
+                  "memory"
+                  "gpu"
+                  "temperature"
+                  "weather"
+                  "network"
+                  "volume"
+                  "microphone"
+                  "battery"
+                ];
+                description = ''
+                  Status indicators shown before the clock, in order. Indicators with
+                  nothing to show (no battery, no GPU sensor, no weather location)
+                  are hidden automatically.
+                '';
+              };
+              units = lib.mkOption {
+                type = lib.types.enum [
+                  "metric"
+                  "imperial"
+                ];
+                default = "metric";
+                description = "Show temperatures in °C (metric) or °F (imperial).";
+              };
+              weather = {
+                latitude = lib.mkOption {
+                  type = lib.types.nullOr lib.types.number;
+                  default = null;
+                  example = 39.28;
+                  description = "Latitude for the weather indicator, which is hidden until both coordinates are set.";
+                };
+                longitude = lib.mkOption {
+                  type = lib.types.nullOr lib.types.number;
+                  default = null;
+                  example = -76.62;
+                  description = "Longitude for the weather indicator.";
+                };
+              };
             };
+            # Icon glyphs for the status indicators.
+            packages = [ pkgs.nerd-fonts.symbols-only ];
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
+              BULLPEN_MODULES = lib.concatStringsSep "," cfg.bullpen.modules;
+              BULLPEN_UNITS = cfg.bullpen.units;
+            }
+            // lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null) {
+              BULLPEN_WEATHER_LOCATION = "${toString cfg.bullpen.weather.latitude},${toString cfg.bullpen.weather.longitude}";
             };
           };
           dugout = {
@@ -124,6 +184,7 @@
           home = {
             packages =
               (map appPackage (lib.attrNames enabledApps))
+              ++ lib.concatMap (app: app.packages or [ ]) (lib.attrValues enabledApps)
               ++ (lib.optional (cfg.font.package != null) cfg.font.package);
 
             sessionVariables = lib.foldl' (acc: app: acc // app.sessionVariables) { } (

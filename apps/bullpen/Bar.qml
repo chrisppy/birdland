@@ -17,6 +17,30 @@ PanelWindow {
     // One line of text on top/bottom bars; room for the stacked clock on the sides.
     readonly property int thickness: vertical ? 48 : 30
 
+    // Status indicators shown before the clock, in order. Set with
+    // BULLPEN_MODULES, a comma-separated list of the names in `indicators`.
+    readonly property var modules: {
+        const value = Quickshell.env("BULLPEN_MODULES");
+        const list = value === null || value === undefined ? "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery" : String(value);
+        return list.split(",").map(s => s.trim()).filter(s => s !== "");
+    }
+    // BULLPEN_UNITS=imperial shows °F; the default is metric.
+    readonly property bool imperial: String(Quickshell.env("BULLPEN_UNITS") ?? "").toLowerCase() === "imperial"
+    // "latitude,longitude" for the weather; it stays hidden without one.
+    readonly property string weatherLocation: String(Quickshell.env("BULLPEN_WEATHER_LOCATION") ?? "")
+
+    readonly property var indicators: ({
+            cpu: cpuIndicator,
+            memory: memoryIndicator,
+            gpu: gpuIndicator,
+            temperature: temperatureIndicator,
+            weather: weatherIndicator,
+            network: networkIndicator,
+            volume: volumeIndicator,
+            microphone: microphoneIndicator,
+            battery: batteryIndicator
+        })
+
     implicitWidth: vertical ? thickness : 0
     implicitHeight: vertical ? 0 : thickness
     // Transparent, so the screen shows through the panel's rounded corners.
@@ -63,7 +87,7 @@ PanelWindow {
         Text {
             visible: !bar.vertical
             anchors.centerIn: parent
-            width: Math.max(0, Math.min(implicitWidth, parent.width - 2 * (Math.max(workspaces.width, clock.width) + Theme.spacingMedium + Theme.spacingLarge)))
+            width: Math.max(0, Math.min(implicitWidth, parent.width - 2 * (Math.max(workspaces.width, end.width) + Theme.spacingMedium + Theme.spacingLarge)))
 
             text: niri.focusedWindow?.title ?? ""
             color: Theme.textBright
@@ -74,11 +98,18 @@ PanelWindow {
             }
         }
 
-        // end: clock
-        Clock {
-            id: clock
+        // end: status indicators, then the clock. In a row on top/bottom bars,
+        // in a column on the sides. Unavailable indicators (no battery, no
+        // weather location...) take no space.
+        Grid {
+            id: end
 
-            vertical: bar.vertical
+            columns: bar.vertical ? 1 : -1
+            rows: bar.vertical ? -1 : 1
+            columnSpacing: Theme.spacingLarge
+            rowSpacing: Theme.spacingMedium + Theme.spacingSmall
+            horizontalItemAlignment: Grid.AlignHCenter
+            verticalItemAlignment: Grid.AlignVCenter
 
             anchors {
                 right: bar.vertical ? undefined : parent.right
@@ -88,6 +119,102 @@ PanelWindow {
                 bottomMargin: Theme.spacingMedium
                 horizontalCenter: bar.vertical ? parent.horizontalCenter : undefined
             }
+
+            Repeater {
+                model: bar.modules
+
+                Loader {
+                    required property string modelData
+
+                    objectName: "indicator-" + modelData
+                    sourceComponent: bar.indicators[modelData] ?? null
+                    visible: item?.available ?? false
+
+                    Component.onCompleted: {
+                        if (!bar.indicators[modelData])
+                            console.warn("bullpen: unknown module in BULLPEN_MODULES:", modelData);
+                    }
+                }
+            }
+
+            Clock {
+                id: clock
+
+                vertical: bar.vertical
+            }
+        }
+    }
+
+    // Shared by the cpu, memory, gpu and temperature indicators; only samples
+    // while one of them is shown.
+    SystemStats {
+        id: systemStats
+
+        running: ["cpu", "memory", "gpu", "temperature"].some(name => bar.modules.includes(name))
+        sampleGpu: bar.modules.includes("gpu")
+    }
+
+    Component {
+        id: cpuIndicator
+        Cpu {
+            stats: systemStats
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: memoryIndicator
+        Memory {
+            stats: systemStats
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: gpuIndicator
+        Gpu {
+            stats: systemStats
+            vertical: bar.vertical
+            imperial: bar.imperial
+        }
+    }
+    Component {
+        id: temperatureIndicator
+        Temperature {
+            stats: systemStats
+            vertical: bar.vertical
+            imperial: bar.imperial
+        }
+    }
+    Component {
+        id: weatherIndicator
+        Weather {
+            location: bar.weatherLocation
+            vertical: bar.vertical
+            imperial: bar.imperial
+        }
+    }
+    Component {
+        id: networkIndicator
+        Network {
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: volumeIndicator
+        Audio {
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: microphoneIndicator
+        Audio {
+            input: true
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: batteryIndicator
+        Battery {
+            vertical: bar.vertical
         }
     }
 }

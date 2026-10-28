@@ -7,9 +7,13 @@ import Quickshell.Io
 // Usage values are 0-1 and temperatures °C; they stay -1 / NaN until known,
 // and for sensors this machine doesn't have.
 //
-// Sources: /proc/stat and /proc/meminfo; hwmon for temperatures; the DRM
-// gpu_busy_percent file for GPU usage (AMD); otherwise nvidia-smi, only on
-// machines with no gpu_busy_percent (it keeps a sleeping NVIDIA GPU awake).
+// Sources: /proc/stat and /proc/meminfo; hwmon for temperatures. GPU usage,
+// first match wins:
+// - AMD: the DRM gpu_busy_percent file.
+// - Intel: the time not spent in the render engine's idle state (RC6 on i915,
+//   gt-c6 on xe), from its residency counter in sysfs.
+// - NVIDIA: nvidia-smi, only when neither of the above exists, because it
+//   keeps a sleeping NVIDIA GPU awake.
 Scope {
     id: root
 
@@ -26,11 +30,15 @@ Scope {
     property string cpuTempPath: ""
     property string gpuTempPath: ""
     property string gpuBusyPath: ""
+    property string gpuIdlePath: ""
     property bool hasNvidiaSmi: false
-    readonly property bool useNvidia: sampleGpu && hasNvidiaSmi && gpuBusyPath === ""
+    readonly property string intelIdlePath: gpuBusyPath === "" ? gpuIdlePath : ""
+    readonly property bool useNvidia: sampleGpu && hasNvidiaSmi && gpuBusyPath === "" && gpuIdlePath === ""
 
     property real lastCpuTotal: -1
     property real lastCpuIdle: 0
+    property real lastGpuIdleMs: -1
+    property real lastGpuIdleAt: 0
 
     // "cpu  user nice system idle iowait irq softirq steal ..." in clock ticks.
     function parseStat(text) {
@@ -50,8 +58,18 @@ Scope {
             memoryUsage = 1 - kib("MemAvailable") / total;
     }
 
+    // Intel: a cumulative count of milliseconds the GPU spent idle. Busy is the
+    // share of wall time since the last sample it was not idle. Skips the
+    // first sample and counter wraparound (i915's is 32-bit).
+    function parseGpuIdle(idleMs, now) {
+        if (lastGpuIdleMs >= 0 && now > lastGpuIdleAt && idleMs >= lastGpuIdleMs)
+            gpuUsage = Math.max(0, Math.min(1, 1 - (idleMs - lastGpuIdleMs) / (now - lastGpuIdleAt)));
+        lastGpuIdleMs = idleMs;
+        lastGpuIdleAt = now;
+    }
+
     // Lines from the probe below: "temp<TAB>chip<TAB>label<TAB>path",
-    // "gpu-busy<TAB>path" and "nvidia".
+    // "gpu-busy<TAB>path", "gpu-idle<TAB>path" and "nvidia".
     function parseSensors(text) {
         const temps = [];
         for (const line of text.split("\n")) {
@@ -64,6 +82,8 @@ Scope {
                 });
             else if (f[0] === "gpu-busy" && gpuBusyPath === "")
                 gpuBusyPath = f[1];
+            else if (f[0] === "gpu-idle" && gpuIdlePath === "")
+                gpuIdlePath = f[1];
             else if (f[0] === "nvidia")
                 hasNvidiaSmi = true;
         }
@@ -132,6 +152,14 @@ Scope {
             for f in /sys/class/drm/card*/device/gpu_busy_percent; do
               [ -r "$f" ] && printf 'gpu-busy\\t%s\\n' "$f"
             done
+            for f in /sys/class/drm/card*/gt/gt0/rc6_residency_ms /sys/class/drm/card*/power/rc6_residency_ms; do
+              [ -r "$f" ] && printf 'gpu-idle\\t%s\\n' "$f"
+            done
+            for d in /sys/class/drm/card*/device/tile*/gt*/gtidle; do
+              case "$(cat "$d/name" 2>/dev/null)" in
+                *-rc) [ -r "$d/idle_residency_ms" ] && printf 'gpu-idle\\t%s\\n' "$d/idle_residency_ms" ;;
+              esac
+            done
             command -v nvidia-smi >/dev/null 2>&1 && printf 'nvidia\\n'
             true`]
         stdout: StdioCollector {
@@ -169,6 +197,12 @@ Scope {
         onLoaded: root.gpuUsage = Number(text()) / 100
     }
 
+    FileView {
+        id: gpuIdleFile
+        path: root.sampleGpu ? root.intelIdlePath : ""
+        onLoaded: root.parseGpuIdle(Number(text()), Date.now())
+    }
+
     // "34, 61": utilization %, temperature °C. First GPU only.
     Process {
         id: nvidia
@@ -198,6 +232,8 @@ Scope {
                 gpuTempFile.reload();
             if (gpuBusyFile.path !== "")
                 gpuBusyFile.reload();
+            if (gpuIdleFile.path !== "")
+                gpuIdleFile.reload();
             if (root.useNvidia && !nvidia.running)
                 nvidia.running = true;
         }

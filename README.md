@@ -125,7 +125,7 @@ sensor, no weather location) hides itself.
 | Indicator | Shows | Needs |
 | :-------------- | :------------------------------------------- | :--------------------------------------------------------------------- |
 | `cpu`, `memory` | Usage | Nothing (`/proc`) |
-| `gpu` | Usage, and temperature when available | AMD: nothing (sysfs). NVIDIA: `nvidia-smi`. Intel: not supported |
+| `gpu` | Usage, and temperature when available | AMD, Intel (`i915`, `xe`): nothing (sysfs). NVIDIA: `nvidia-smi` |
 | `temperature` | CPU temperature | A hwmon sensor: `k10temp`, `zenpower`, `coretemp`... |
 | `weather` | Current conditions from Open-Meteo | Internet access and `weather.latitude`/`longitude` |
 | `network` | Wired, or Wi-Fi signal strength | NetworkManager |
@@ -135,9 +135,18 @@ sensor, no weather location) hides itself.
 
 Icons come from the Symbols Nerd Font, which the Home Manager module installs.
 
-On laptops with an NVIDIA GPU and no AMD GPU, the `gpu` indicator polls
-`nvidia-smi`, which keeps the NVIDIA GPU awake. Leave `gpu` out of `modules` to
-save battery.
+The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
+then Intel, then NVIDIA. Intel usage is the share of time the render engine is
+out of its idle state (RC6 on `i915`, gt-c6 on `xe`). The engine stays awake
+briefly after each burst of work, so this can read higher than `intel_gpu_top`
+at light load. Integrated Intel GPUs have no temperature sensor of their own;
+their heat shows in the CPU temperature.
+
+Reading usage wakes a sleeping GPU. That doesn't matter for the GPU driving your
+screen, which is awake anyway. NVIDIA is only polled when there is no AMD or
+Intel GPU, so Intel + NVIDIA laptops leave the NVIDIA GPU asleep. On a machine
+whose only readable GPU is a discrete one that sleeps, leave `gpu` out of
+`modules` to save power.
 
 The weather request sends only the configured coordinates to
 [Open-Meteo](https://open-meteo.com), every 15 minutes; click the indicator to

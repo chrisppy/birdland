@@ -119,8 +119,8 @@ for the format.
 
 ## Development
 
-The dev shell can run any app straight from the checkout, and Quickshell
-reloads it as you edit:
+The dev shell can run any app straight from the checkout, and Quickshell reloads
+it as you edit:
 
 ```sh
 just dev                               # enter the dev shell

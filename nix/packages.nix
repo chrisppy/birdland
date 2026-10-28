@@ -20,6 +20,8 @@
           # A Base24 theme attrset, e.g. one of base24.themes.
           theme ? base24.themes.birdland,
           fontFamily ? "Sans-Serif",
+          # Extra makeWrapper arguments for the app's launcher.
+          wrapperArgs ? [ ],
         }:
         pkgs.stdenvNoCC.mkDerivation {
           pname = "birdland-${name}";
@@ -52,7 +54,8 @@
 
             makeWrapper ${lib.getExe qsPkg} $out/bin/birdland-${name} \
               --prefix QML2_IMPORT_PATH : ${niriPlugin}/lib/qt-6/qml:$out/share/birdland \
-              --add-flags "-p $out/share/birdland/${name}"
+              --add-flags "-p $out/share/birdland/${name}" \
+              ${lib.escapeShellArgs wrapperArgs}
           '';
 
           meta.mainProgram = "birdland-${name}";
@@ -70,6 +73,16 @@
         lineup = mkApp {
           name = "lineup";
         };
+        outfield = mkApp {
+          name = "outfield";
+          # Qt only reads JPEG, PNG, BMP and GIF by itself; this adds WebP and TIFF.
+          wrapperArgs = [
+            "--prefix"
+            "QT_PLUGIN_PATH"
+            ":"
+            "${pkgs.qt6.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}"
+          ];
+        };
 
         birdland = pkgs.symlinkJoin {
           name = "birdland-suite";
@@ -77,6 +90,7 @@
             bullpen
             dugout
             lineup
+            outfield
           ];
         };
 

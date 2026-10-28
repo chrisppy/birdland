@@ -40,6 +40,11 @@
           "battery"
         ];
 
+        # A wallpaper image or folder: a Nix path (copied into the store) or a
+        # string such as "~/Pictures/Wallpapers" (used where it is).
+        wallpaperSource = lib.types.either lib.types.path lib.types.str;
+        sourceString = source: if builtins.isPath source then "${source}" else source;
+
         apps = {
           bullpen = {
             description = "Bullpen Status Bar for Niri";
@@ -153,6 +158,61 @@
             sessionVariables = {
               LINEUP_POSITION = cfg.lineup.position;
               LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
+            };
+          };
+          outfield = {
+            description = "Outfield Wallpapers for Niri";
+            extraOptions = {
+              wallpaper = lib.mkOption {
+                type = lib.types.nullOr wallpaperSource;
+                default = null;
+                example = "~/Pictures/Wallpapers";
+                description = ''
+                  Image, or folder of images, for every monitor. A folder rotates
+                  every `interval` minutes. Without one, monitors show the theme's
+                  background color.
+                '';
+              };
+              outputs = lib.mkOption {
+                type = lib.types.attrsOf wallpaperSource;
+                default = { };
+                example = {
+                  "DP-1" = "~/Pictures/Ultrawide";
+                };
+                description = "Per-monitor images or folders, by output name (see `niri msg outputs`).";
+              };
+              interval = lib.mkOption {
+                type = lib.types.ints.unsigned;
+                default = 30;
+                description = "Minutes between images from a folder; 0 keeps the first one.";
+              };
+              shuffle = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Pick images from a folder at random instead of in file-name order.";
+              };
+              fill = lib.mkOption {
+                type = lib.types.enum [
+                  "fill"
+                  "fit"
+                  "stretch"
+                  "center"
+                  "tile"
+                ];
+                default = "fill";
+                description = "How images fit the screen: fill crops to cover it, fit shows all of the image.";
+              };
+            };
+            # One JSON file rather than variables: paths and the per-monitor map
+            # can hold spaces and quotes, which systemd's Environment= would mangle.
+            sessionVariables = {
+              OUTFIELD_CONFIG = "${pkgs.writeText "outfield.json" (
+                builtins.toJSON {
+                  wallpaper = if cfg.outfield.wallpaper == null then null else sourceString cfg.outfield.wallpaper;
+                  outputs = lib.mapAttrs (_: sourceString) cfg.outfield.outputs;
+                  inherit (cfg.outfield) interval shuffle fill;
+                }
+              )}";
             };
           };
         };

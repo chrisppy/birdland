@@ -24,6 +24,14 @@ toggle-dugout:
 run-lineup:
     nix run .#lineup
 
+# Run the Outfield wallpapers (e.g. OUTFIELD_WALLPAPER=~/Pictures/Wallpapers just run-outfield)
+run-outfield:
+    nix run .#outfield
+
+# Show the next wallpaper in a running Outfield
+next-wallpaper:
+    nix run .#outfield -- ipc call outfield next
+
 # Check flake outputs and evaluation
 check:
     nix flake check

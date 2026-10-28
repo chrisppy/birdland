@@ -8,7 +8,7 @@ through Nix Flakes and Home Manager. Designed with native support for the
 
 ## Components
 
-Birdland is split into three core Quickshell applications, which can be used
+Birdland is split into four Quickshell applications, which can be used
 individually or as a complete suite:
 
 - **`bullpen`**: A flexible status bar attachable to any screen edge (`top`,
@@ -18,6 +18,8 @@ individually or as a complete suite:
 - **`dugout`**: A quick application launcher.
 - **`lineup`**: A customizable favorite apps dock for launching and managing
   pinned applications.
+- **`outfield`**: Wallpapers on every monitor: an image, or a folder that
+  rotates, with optional per-monitor choices.
 
 ______________________________________________________________________
 
@@ -93,6 +95,13 @@ Import the Home Manager module provided by the flake and enable the suite:
         "org.gnome.Nautilus"
       ];
     };
+
+    outfield = {
+      enable = true;
+      wallpaper = "~/Pictures/Wallpapers"; # an image or a folder
+      outputs."DP-1" = ./ultrawide.jpg;    # optional, per monitor
+      interval = 30;                       # minutes between images from a folder
+    };
   };
 }
 ```
@@ -120,6 +129,12 @@ ______________________________________________________________________
 | `programs.birdland.lineup.enable` | boolean | `false` | Enable the Lineup favorite apps dock. |
 | `programs.birdland.lineup.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.lineup.favorites` | list of strings | `[]` | Desktop entry IDs of pinned apps in order. |
+| `programs.birdland.outfield.enable` | boolean | `false` | Enable the Outfield wallpapers. |
+| `programs.birdland.outfield.wallpaper` | path / string or null | `null` | Image or folder for every monitor; `null` shows the theme background. |
+| `programs.birdland.outfield.outputs` | attrs of path / string | `{ }` | Per-monitor image or folder, by output name. |
+| `programs.birdland.outfield.interval` | integer | `30` | Minutes between images from a folder; `0` keeps the first. |
+| `programs.birdland.outfield.shuffle` | boolean | `true` | Random order instead of file-name order. |
+| `programs.birdland.outfield.fill` | enum | `"fill"` | `fill` (crop to cover), `fit`, `stretch`, `center` or `tile`. |
 
 ______________________________________________________________________
 
@@ -171,6 +186,38 @@ refresh it.
 
 ______________________________________________________________________
 
+## Outfield wallpapers
+
+Outfield draws a wallpaper on every monitor, in place of tools like `swaybg`.
+`wallpaper` and `outputs` take a Nix path (copied into the store, e.g.
+`./wall.jpg`) or a string used where it is (e.g. `"~/Pictures/Wallpapers"`). A
+folder shows its JPEG, PNG, WebP, BMP, GIF and TIFF images, rotating every
+`interval` minutes with a crossfade, and picks up files you add or remove.
+Images are decoded at the screen's resolution, so large photos stay sharp
+without using much memory.
+
+Control a running Outfield over IPC, e.g. from a Niri keybind:
+
+```sh
+birdland-outfield ipc call outfield next                       # next image from the folder
+birdland-outfield ipc call outfield set ~/Pictures/beach.jpg   # every monitor, until reload
+birdland-outfield ipc call outfield setOutput DP-1 ~/Pictures/wide
+birdland-outfield ipc call outfield reload                     # back to the configured ones
+birdland-outfield ipc call outfield current                    # what each monitor shows
+```
+
+To show the wallpaper in Niri's overview and between workspaces, add a layer
+rule to your Niri config (needs Niri 25.05 or later):
+
+```kdl
+layer-rule {
+    match namespace="^birdland-outfield$"
+    place-within-backdrop true
+}
+```
+
+______________________________________________________________________
+
 ## Theming
 
 Birdland translates [Base24](https://github.com/tinted-theming/base24) color
@@ -196,6 +243,7 @@ BULLPEN_POSITION=left qs -p apps/bullpen
 BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu,volume qs -p apps/bullpen
 BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
+OUTFIELD_WALLPAPER=~/Pictures/Wallpapers OUTFIELD_INTERVAL=1 qs -p apps/outfield
 ```
 
 Entering the shell generates the default theme into

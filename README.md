@@ -72,6 +72,12 @@ Import the Home Manager module provided by the flake and enable the suite:
         latitude = 39.28;
         longitude = -76.62;
       };
+      # What goes where, in order (these are the defaults)
+      layout = {
+        left = [ "workspaces" ];
+        center = [ "title" ];
+        right = [ "cpu" "memory" "gpu" "temperature" "weather" "network" "volume" "microphone" "battery" "clock" ];
+      };
     };
 
     dugout = {
@@ -104,7 +110,9 @@ ______________________________________________________________________
 | `programs.birdland.font.package` | package | `pkgs.inter` | Nix package for the font. |
 | `programs.birdland.bullpen.enable` | boolean | `false` | Enable the Bullpen status bar. |
 | `programs.birdland.bullpen.position` | enum | `"top"` | Screen edge (`top`, `bottom`, `left`, `right`). |
-| `programs.birdland.bullpen.modules` | list of enum | all | Status indicators before the clock, in order (see below). |
+| `programs.birdland.bullpen.layout.left` | list of modules | `[ "workspaces" ]` | Left part of the bar (top on side bars), in order. |
+| `programs.birdland.bullpen.layout.center` | list of modules | `[ "title" ]` | Center of the bar, in order. |
+| `programs.birdland.bullpen.layout.right` | list of modules | indicators, `"clock"` | Right part of the bar (bottom on side bars), in order. |
 | `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |
 | `programs.birdland.bullpen.weather.latitude` | number or null | `null` | Weather location; the weather is hidden until both are set. |
 | `programs.birdland.bullpen.weather.longitude` | number or null | `null` | Weather location. |
@@ -115,15 +123,22 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Bullpen status indicators
+## Bullpen layout
 
-`bullpen.modules` picks the indicators and their order. The default is all of
-them: `cpu`, `memory`, `gpu`, `temperature`, `weather`, `network`, `volume`,
-`microphone`, `battery`. An indicator with nothing to show (no battery, no GPU
-sensor, no weather location) hides itself.
+`bullpen.layout` sets what goes in the left, center and right parts of the bar,
+and in what order. On side bars, left is the top and right the bottom. Any
+module can go in any part, a part can be empty (`[ ]`), and a module left out of
+all three isn't shown.
 
-| Indicator | Shows | Needs |
+The center stays centered on the bar. A long window title is shortened with
+"…" to fit; outside the center it is capped at a quarter of the bar. The
+workspaces pill stays flush against the screen edge wherever it is placed.
+
+| Module | Shows | Needs |
 | :-------------- | :------------------------------------------- | :--------------------------------------------------------------------- |
+| `workspaces` | Niri workspaces; click one to switch | Niri |
+| `title` | Focused window title (top/bottom bars only) | Niri |
+| `clock` | Time and date | Nothing |
 | `cpu`, `memory` | Usage | Nothing (`/proc`) |
 | `gpu` | Usage, and temperature when available | AMD, Intel (`i915`, `xe`): nothing (sysfs). NVIDIA: `nvidia-smi` |
 | `temperature` | CPU temperature | A hwmon sensor: `k10temp`, `zenpower`, `coretemp`... |
@@ -133,7 +148,9 @@ sensor, no weather location) hides itself.
 | `microphone` | Default input; click mutes, scroll changes it | PipeWire with WirePlumber |
 | `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |
 
-Icons come from the Symbols Nerd Font, which the Home Manager module installs.
+Modules with nothing to show (no battery, no GPU sensor, no weather location)
+hide themselves. Icons come from the Symbols Nerd Font, which the Home Manager
+module installs.
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
 then Intel, then NVIDIA. Intel usage is the share of time the render engine is
@@ -145,11 +162,11 @@ their heat shows in the CPU temperature.
 Reading usage wakes a sleeping GPU. That doesn't matter for the GPU driving your
 screen, which is awake anyway. NVIDIA is only polled when there is no AMD or
 Intel GPU, so Intel + NVIDIA laptops leave the NVIDIA GPU asleep. On a machine
-whose only readable GPU is a discrete one that sleeps, leave `gpu` out of
-`modules` to save power.
+whose only readable GPU is a discrete one that sleeps, leave `gpu` out of the
+layout to save power.
 
 The weather request sends only the configured coordinates to
-[Open-Meteo](https://open-meteo.com), every 15 minutes; click the indicator to
+[Open-Meteo](https://open-meteo.com), every 15 minutes; click the weather to
 refresh it.
 
 ______________________________________________________________________
@@ -176,7 +193,7 @@ it as you edit:
 just dev                               # enter the dev shell
 qs -p apps/bullpen                     # run an app
 BULLPEN_POSITION=left qs -p apps/bullpen
-BULLPEN_MODULES=cpu,volume BULLPEN_UNITS=imperial qs -p apps/bullpen
+BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu,volume qs -p apps/bullpen
 BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
 ```

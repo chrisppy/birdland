@@ -9,6 +9,8 @@ Rectangle {
     // the screen, and runs vertically on left/right bars.
     property string edge: "top"
     readonly property bool vertical: edge === "left" || edge === "right"
+    // Sits flush against the screen edge, wherever it is in the bar.
+    readonly property bool hugsEdge: true
 
     // The pill always has room for maxDots workspace dots.
     readonly property int maxDots: 11

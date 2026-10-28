@@ -25,6 +25,21 @@
             fontFamily = cfg.font.family;
           };
 
+        bullpenModule = lib.types.enum [
+          "workspaces"
+          "title"
+          "clock"
+          "cpu"
+          "memory"
+          "gpu"
+          "temperature"
+          "weather"
+          "network"
+          "volume"
+          "microphone"
+          "battery"
+        ];
+
         apps = {
           bullpen = {
             description = "Bullpen Status Bar for Niri";
@@ -39,9 +54,20 @@
                 default = "top";
                 description = "Screen edge the Bullpen bar is attached to.";
               };
-              modules = lib.mkOption {
-                type = lib.types.listOf (
-                  lib.types.enum [
+              layout = {
+                left = lib.mkOption {
+                  type = lib.types.listOf bullpenModule;
+                  default = [ "workspaces" ];
+                  description = "Modules in the left part of the bar (the top on side bars), in order.";
+                };
+                center = lib.mkOption {
+                  type = lib.types.listOf bullpenModule;
+                  default = [ "title" ];
+                  description = "Modules in the center of the bar, in order.";
+                };
+                right = lib.mkOption {
+                  type = lib.types.listOf bullpenModule;
+                  default = [
                     "cpu"
                     "memory"
                     "gpu"
@@ -51,24 +77,14 @@
                     "volume"
                     "microphone"
                     "battery"
-                  ]
-                );
-                default = [
-                  "cpu"
-                  "memory"
-                  "gpu"
-                  "temperature"
-                  "weather"
-                  "network"
-                  "volume"
-                  "microphone"
-                  "battery"
-                ];
-                description = ''
-                  Status indicators shown before the clock, in order. Indicators with
-                  nothing to show (no battery, no GPU sensor, no weather location)
-                  are hidden automatically.
-                '';
+                    "clock"
+                  ];
+                  description = ''
+                    Modules in the right part of the bar (the bottom on side bars), in
+                    order. Modules with nothing to show (no battery, no GPU sensor, no
+                    weather location) hide themselves.
+                  '';
+                };
               };
               units = lib.mkOption {
                 type = lib.types.enum [
@@ -97,7 +113,9 @@
             packages = [ pkgs.nerd-fonts.symbols-only ];
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
-              BULLPEN_MODULES = lib.concatStringsSep "," cfg.bullpen.modules;
+              BULLPEN_LEFT = lib.concatStringsSep "," cfg.bullpen.layout.left;
+              BULLPEN_CENTER = lib.concatStringsSep "," cfg.bullpen.layout.center;
+              BULLPEN_RIGHT = lib.concatStringsSep "," cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
             }
             // lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null) {

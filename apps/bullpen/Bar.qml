@@ -17,28 +17,38 @@ PanelWindow {
     // One line of text on top/bottom bars; room for the stacked clock on the sides.
     readonly property int thickness: vertical ? 48 : 30
 
-    // Status indicators shown before the clock, in order. Set with
-    // BULLPEN_MODULES, a comma-separated list of the names in `indicators`.
-    readonly property var modules: {
-        const value = Quickshell.env("BULLPEN_MODULES");
-        const list = value === null || value === undefined ? "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery" : String(value);
+    // What goes in each part of the bar, in order: comma-separated names from
+    // `modules`, set with BULLPEN_LEFT, BULLPEN_CENTER and BULLPEN_RIGHT. On
+    // side bars, left is the top and right the bottom. An empty value leaves
+    // that part empty; unset uses the default.
+    function sectionModules(variable, fallback) {
+        const value = Quickshell.env(variable);
+        const list = value === null || value === undefined ? fallback : String(value);
         return list.split(",").map(s => s.trim()).filter(s => s !== "");
     }
+    readonly property var leftModules: sectionModules("BULLPEN_LEFT", "workspaces")
+    readonly property var centerModules: sectionModules("BULLPEN_CENTER", "title")
+    readonly property var rightModules: sectionModules("BULLPEN_RIGHT", "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,clock")
+    readonly property var allModules: leftModules.concat(centerModules, rightModules)
+
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
     readonly property bool imperial: String(Quickshell.env("BULLPEN_UNITS") ?? "").toLowerCase() === "imperial"
     // "latitude,longitude" for the weather; it stays hidden without one.
     readonly property string weatherLocation: String(Quickshell.env("BULLPEN_WEATHER_LOCATION") ?? "")
 
-    readonly property var indicators: ({
-            cpu: cpuIndicator,
-            memory: memoryIndicator,
-            gpu: gpuIndicator,
-            temperature: temperatureIndicator,
-            weather: weatherIndicator,
-            network: networkIndicator,
-            volume: volumeIndicator,
-            microphone: microphoneIndicator,
-            battery: batteryIndicator
+    readonly property var modules: ({
+            workspaces: workspacesModule,
+            title: titleModule,
+            clock: clockModule,
+            cpu: cpuModule,
+            memory: memoryModule,
+            gpu: gpuModule,
+            temperature: temperatureModule,
+            weather: weatherModule,
+            network: networkModule,
+            volume: volumeModule,
+            microphone: microphoneModule,
+            battery: batteryModule
         })
 
     implicitWidth: vertical ? thickness : 0
@@ -54,6 +64,12 @@ PanelWindow {
     }
 
     Rectangle {
+        id: panel
+
+        // Both sides get the size of the larger one, so the center part stays
+        // centered on the bar.
+        readonly property real sideSize: bar.vertical ? Math.max(leftSection.implicitHeight, rightSection.implicitHeight) : Math.max(leftSection.implicitWidth, rightSection.implicitWidth)
+
         anchors.fill: parent
         color: Theme.background
         border.color: Theme.border
@@ -65,30 +81,121 @@ PanelWindow {
         bottomLeftRadius: bar.edge === "top" || bar.edge === "right" ? Theme.radiusXLarge : 0
         bottomRightRadius: bar.edge === "top" || bar.edge === "left" ? Theme.radiusXLarge : 0
 
-        // start: workspaces, flush with the screen edge
-        Workspaces {
-            id: workspaces
+        // left (top on side bars)
+        Item {
+            id: leftArea
 
-            edge: bar.edge
+            width: panel.sideSize
+            height: panel.sideSize
 
             anchors {
-                top: bar.edge !== "bottom" ? parent.top : undefined
-                bottom: bar.edge === "bottom" ? parent.bottom : undefined
-                left: bar.edge !== "right" ? parent.left : undefined
-                right: bar.edge === "right" ? parent.right : undefined
+                left: parent.left
+                top: parent.top
+                bottom: bar.vertical ? undefined : parent.bottom
+                right: bar.vertical ? parent.right : undefined
                 leftMargin: bar.vertical ? 0 : Theme.spacingMedium
                 topMargin: bar.vertical ? Theme.spacingMedium : 0
             }
+
+            Section {
+                id: leftSection
+
+                owner: bar
+                names: bar.leftModules
+
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    bottom: bar.vertical ? undefined : parent.bottom
+                    right: bar.vertical ? parent.right : undefined
+                }
+            }
         }
 
-        // center: focused window title (horizontal bars only). Its width keeps
-        // it clear of the workspaces and clock on both sides, so it stays
-        // centered and long titles are elided instead of overlapping them.
-        Text {
-            visible: !bar.vertical
-            anchors.centerIn: parent
-            width: Math.max(0, Math.min(implicitWidth, parent.width - 2 * (Math.max(workspaces.width, end.width) + Theme.spacingMedium + Theme.spacingLarge)))
+        // center: between the two sides, centered on the bar
+        Item {
+            id: centerArea
 
+            anchors {
+                left: bar.vertical ? parent.left : leftArea.right
+                right: bar.vertical ? parent.right : rightArea.left
+                top: bar.vertical ? leftArea.bottom : parent.top
+                bottom: bar.vertical ? rightArea.top : parent.bottom
+                leftMargin: bar.vertical ? 0 : Theme.spacingLarge
+                rightMargin: bar.vertical ? 0 : Theme.spacingLarge
+                topMargin: bar.vertical ? Theme.spacingLarge : 0
+                bottomMargin: bar.vertical ? Theme.spacingLarge : 0
+            }
+
+            Section {
+                id: centerSection
+
+                owner: bar
+                names: bar.centerModules
+                center: true
+
+                anchors.centerIn: parent
+                width: bar.vertical ? parent.width : Math.max(0, Math.min(implicitWidth, parent.width))
+                height: bar.vertical ? Math.max(0, Math.min(implicitHeight, parent.height)) : parent.height
+            }
+        }
+
+        // right (bottom on side bars)
+        Item {
+            id: rightArea
+
+            width: panel.sideSize
+            height: panel.sideSize
+
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+                top: bar.vertical ? undefined : parent.top
+                left: bar.vertical ? parent.left : undefined
+                rightMargin: bar.vertical ? 0 : Theme.spacingMedium
+                bottomMargin: bar.vertical ? Theme.spacingMedium : 0
+            }
+
+            Section {
+                id: rightSection
+
+                owner: bar
+                names: bar.rightModules
+
+                anchors {
+                    right: parent.right
+                    bottom: parent.bottom
+                    top: bar.vertical ? undefined : parent.top
+                    left: bar.vertical ? parent.left : undefined
+                }
+            }
+        }
+    }
+
+    // Shared by the cpu, memory, gpu and temperature modules; only samples
+    // while one of them is in the bar.
+    SystemStats {
+        id: systemStats
+
+        running: ["cpu", "memory", "gpu", "temperature"].some(name => bar.allModules.includes(name))
+        sampleGpu: bar.allModules.includes("gpu")
+    }
+
+    Component {
+        id: workspacesModule
+        Workspaces {
+            edge: bar.edge
+        }
+    }
+    // Focused window title. Top/bottom bars only; long titles are elided.
+    Component {
+        id: titleModule
+        Text {
+            readonly property bool available: !bar.vertical
+            // Set by the section: the room it has. Longer titles are elided.
+            property real maxWidth: Number.POSITIVE_INFINITY
+
+            width: Math.min(implicitWidth, maxWidth)
             text: niri.focusedWindow?.title ?? ""
             color: Theme.textBright
             elide: Text.ElideRight
@@ -97,79 +204,29 @@ PanelWindow {
                 pixelSize: Fonts.size
             }
         }
-
-        // end: status indicators, then the clock. In a row on top/bottom bars,
-        // in a column on the sides. Unavailable indicators (no battery, no
-        // weather location...) take no space.
-        Grid {
-            id: end
-
-            columns: bar.vertical ? 1 : -1
-            rows: bar.vertical ? -1 : 1
-            columnSpacing: Theme.spacingLarge
-            rowSpacing: Theme.spacingMedium + Theme.spacingSmall
-            horizontalItemAlignment: Grid.AlignHCenter
-            verticalItemAlignment: Grid.AlignVCenter
-
-            anchors {
-                right: bar.vertical ? undefined : parent.right
-                rightMargin: Theme.spacingMedium
-                verticalCenter: bar.vertical ? undefined : parent.verticalCenter
-                bottom: bar.vertical ? parent.bottom : undefined
-                bottomMargin: Theme.spacingMedium
-                horizontalCenter: bar.vertical ? parent.horizontalCenter : undefined
-            }
-
-            Repeater {
-                model: bar.modules
-
-                Loader {
-                    required property string modelData
-
-                    objectName: "indicator-" + modelData
-                    sourceComponent: bar.indicators[modelData] ?? null
-                    visible: item?.available ?? false
-
-                    Component.onCompleted: {
-                        if (!bar.indicators[modelData])
-                            console.warn("bullpen: unknown module in BULLPEN_MODULES:", modelData);
-                    }
-                }
-            }
-
-            Clock {
-                id: clock
-
-                vertical: bar.vertical
-            }
+    }
+    Component {
+        id: clockModule
+        Clock {
+            vertical: bar.vertical
         }
     }
-
-    // Shared by the cpu, memory, gpu and temperature indicators; only samples
-    // while one of them is shown.
-    SystemStats {
-        id: systemStats
-
-        running: ["cpu", "memory", "gpu", "temperature"].some(name => bar.modules.includes(name))
-        sampleGpu: bar.modules.includes("gpu")
-    }
-
     Component {
-        id: cpuIndicator
+        id: cpuModule
         Cpu {
             stats: systemStats
             vertical: bar.vertical
         }
     }
     Component {
-        id: memoryIndicator
+        id: memoryModule
         Memory {
             stats: systemStats
             vertical: bar.vertical
         }
     }
     Component {
-        id: gpuIndicator
+        id: gpuModule
         Gpu {
             stats: systemStats
             vertical: bar.vertical
@@ -177,7 +234,7 @@ PanelWindow {
         }
     }
     Component {
-        id: temperatureIndicator
+        id: temperatureModule
         Temperature {
             stats: systemStats
             vertical: bar.vertical
@@ -185,7 +242,7 @@ PanelWindow {
         }
     }
     Component {
-        id: weatherIndicator
+        id: weatherModule
         Weather {
             location: bar.weatherLocation
             vertical: bar.vertical
@@ -193,26 +250,26 @@ PanelWindow {
         }
     }
     Component {
-        id: networkIndicator
+        id: networkModule
         Network {
             vertical: bar.vertical
         }
     }
     Component {
-        id: volumeIndicator
+        id: volumeModule
         Audio {
             vertical: bar.vertical
         }
     }
     Component {
-        id: microphoneIndicator
+        id: microphoneModule
         Audio {
             input: true
             vertical: bar.vertical
         }
     }
     Component {
-        id: batteryIndicator
+        id: batteryModule
         Battery {
             vertical: bar.vertical
         }

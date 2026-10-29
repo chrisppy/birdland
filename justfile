@@ -32,6 +32,14 @@ run-outfield:
 next-wallpaper:
     nix run .#outfield -- ipc call outfield next
 
+# Run the Tarp lock screen in the background (it does not lock by itself)
+run-tarp:
+    nix run .#tarp
+
+# Lock the screen with a running Tarp
+lock:
+    nix run .#tarp -- ipc call tarp lock
+
 # Check flake outputs and evaluation
 check:
     nix flake check

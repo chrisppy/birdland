@@ -8,7 +8,7 @@ through Nix Flakes and Home Manager. Designed with native support for the
 
 ## Components
 
-Birdland is split into four Quickshell applications, which can be used
+Birdland is split into six Quickshell applications, which can be used
 individually or as a complete suite:
 
 - **`bullpen`**: A flexible status bar attachable to any screen edge (`top`,
@@ -20,6 +20,10 @@ individually or as a complete suite:
   pinned applications.
 - **`outfield`**: Wallpapers on every monitor: an image, or a folder that
   rotates, with optional per-monitor choices.
+- **`tarp`**: A lock screen that locks on idle, before sleep and on
+  `loginctl lock-session`.
+- **`gate`**: A login screen for greetd, set up through the NixOS module, with a
+  user list, session list and power buttons.
 
 ______________________________________________________________________
 
@@ -102,6 +106,11 @@ Import the Home Manager module provided by the flake and enable the suite:
       outputs."DP-1" = ./ultrawide.jpg;    # optional, per monitor
       interval = 30;                       # minutes between images from a folder
     };
+
+    tarp = {
+      enable = true;
+      lockAfter = 10; # minutes without input; null to never lock on idle
+    };
   };
 }
 ```
@@ -135,6 +144,12 @@ ______________________________________________________________________
 | `programs.birdland.outfield.interval` | integer | `30` | Minutes between images from a folder; `0` keeps the first. |
 | `programs.birdland.outfield.shuffle` | boolean | `true` | Random order instead of file-name order. |
 | `programs.birdland.outfield.fill` | enum | `"fill"` | `fill` (crop to cover), `fit`, `stretch`, `center` or `tile`. |
+| `programs.birdland.tarp.enable` | boolean | `false` | Enable the Tarp lock screen. Needs `systemd.enable`, or start it yourself. |
+| `programs.birdland.tarp.lockAfter` | integer or null | `10` | Minutes without input before locking; `null` never locks on idle. |
+| `programs.birdland.tarp.swayidle` | boolean | `true` | Set up swayidle to lock on idle, before sleep and on `loginctl lock-session`. |
+| `programs.birdland.tarp.pamService` | string | `"login"` | PAM service that checks the password. |
+| `programs.birdland.tarp.wallpaper` | path / string or null | `null` | Image or folder behind the lock; `null` uses Outfield's. |
+| `programs.birdland.tarp.fill` | enum | Outfield's | How the wallpaper fits the screen. |
 
 ______________________________________________________________________
 
@@ -218,6 +233,68 @@ layer-rule {
 
 ______________________________________________________________________
 
+## Tarp lock screen
+
+Tarp runs in the background as a user service and locks every monitor when
+asked; your password unlocks it. With `tarp.swayidle` (the default) it locks
+after `lockAfter` minutes without input, before the machine sleeps, and on
+`loginctl lock-session`. Before sleep, the lock command waits until Niri
+confirms every monitor is covered, so the desktop never shows on resume. To lock
+from a Niri keybind:
+
+```kdl
+Mod+Alt+L { spawn "birdland-tarp" "ipc" "call" "tarp" "lock"; }
+```
+
+The password is checked by PAM's `login` service, which exists on every NixOS
+system and includes fingerprint login if you've enabled it there. To use a
+dedicated service, add `security.pam.services.birdland-tarp = { };` to your
+NixOS configuration and set `tarp.pamService = "birdland-tarp";`.
+
+If Tarp crashes while locked, Niri keeps the screens locked (a solid color).
+systemd restarts Tarp, which notices and locks again, so you can unlock as
+usual. If it doesn't come back, switch to a text console (Ctrl+Alt+F2), log in,
+and run `systemctl --user restart tarp`.
+
+______________________________________________________________________
+
+## Gate login screen (NixOS)
+
+Gate is a login screen for [greetd](https://sr.ht/~kennylevinsen/greetd/),
+shown by the [cage](https://github.com/cage-kiosk/cage) kiosk compositor, so it
+appears on one monitor (the last one connected). Enable it in your NixOS
+configuration, not Home Manager:
+
+```nix
+{ inputs, ... }: {
+  imports = [ inputs.birdland.nixosModules.default ];
+
+  programs.niri.enable = true;      # adds the Niri session to choose from
+  programs.birdland.gate = {
+    enable = true;
+    wallpaper = ./login.jpg;         # copied into the store; optional
+  };
+}
+```
+
+It lists the users with `isNormalUser = true` (showing their `description`)
+and the installed Wayland sessions, remembers the last user and session, and
+has restart and shut down buttons.
+
+| Option | Type | Default | Description |
+| :--------------------------------------------- | :------------------ | :------------------------ | :------------------------------------------------------------ |
+| `programs.birdland.gate.enable` | boolean | `false` | Enable greetd with the Gate greeter. |
+| `programs.birdland.gate.users` | list of strings | all normal users | Users to choose from, in order. |
+| `programs.birdland.gate.defaultSession` | string or null | display manager's default | Session selected until someone picks another, e.g. `"niri"`. |
+| `programs.birdland.gate.power` | boolean | `true` | Show restart and shut down buttons. |
+| `programs.birdland.gate.wallpaper` | path or null | `null` | Image or folder behind the greeter. |
+| `programs.birdland.gate.fill` | enum | `"fill"` | How the wallpaper fits the screen. |
+| `programs.birdland.gate.theme.scheme` | theme name / attrs | `"birdland"` | Base24 theme, as in Home Manager. |
+| `programs.birdland.gate.font.family` | string | `"Inter"` | Font family. |
+| `programs.birdland.gate.font.package` | package or null | `pkgs.inter` | Package providing the font. |
+
+______________________________________________________________________
+
 ## Theming
 
 Birdland translates [Base24](https://github.com/tinted-theming/base24) color
@@ -244,7 +321,10 @@ BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu,volume qs -p apps
 BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
 OUTFIELD_WALLPAPER=~/Pictures/Wallpapers OUTFIELD_INTERVAL=1 qs -p apps/outfield
+qs -p apps/tarp &  qs -p apps/tarp ipc call tarp lock   # your password unlocks it
 ```
+
+Gate needs greetd to log in; run outside it, it shows a warning and the screen.
 
 Entering the shell generates the default theme into
 `modules/theme/Base24Colors.qml` (gitignored) and puts the repo root on

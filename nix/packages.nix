@@ -61,6 +61,15 @@
           meta.mainProgram = "birdland-${name}";
         }
       );
+
+      # Qt only reads JPEG, PNG, BMP and GIF by itself; this adds WebP and TIFF
+      # for the apps that show wallpapers.
+      imageFormats = [
+        "--prefix"
+        "QT_PLUGIN_PATH"
+        ":"
+        "${pkgs.qt6.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}"
+      ];
     in
     {
       packages = rec {
@@ -75,13 +84,17 @@
         };
         outfield = mkApp {
           name = "outfield";
-          # Qt only reads JPEG, PNG, BMP and GIF by itself; this adds WebP and TIFF.
-          wrapperArgs = [
-            "--prefix"
-            "QT_PLUGIN_PATH"
-            ":"
-            "${pkgs.qt6.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}"
-          ];
+          wrapperArgs = imageFormats;
+        };
+        # The lock screen; it runs in the background and locks over IPC.
+        tarp = mkApp {
+          name = "tarp";
+          wrapperArgs = imageFormats;
+        };
+        # The greeter; run by greetd through the NixOS module, not by users.
+        gate = mkApp {
+          name = "gate";
+          wrapperArgs = imageFormats;
         };
 
         birdland = pkgs.symlinkJoin {
@@ -91,6 +104,7 @@
             dugout
             lineup
             outfield
+            tarp
           ];
         };
 

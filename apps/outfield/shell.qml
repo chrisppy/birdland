@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import modules.theme
+import modules.wallpaper
 
 // Outfield: wallpapers. One background-layer window per monitor, showing an
 // image or a rotating folder of images.

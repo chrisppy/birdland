@@ -215,9 +215,87 @@
               )}";
             };
           };
+          tarp = {
+            description = "Tarp Lock Screen for Niri";
+            extraOptions = {
+              lockAfter = lib.mkOption {
+                type = lib.types.nullOr lib.types.ints.positive;
+                default = 10;
+                description = "Lock after this many minutes without input; null never locks on idle.";
+              };
+              swayidle = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = ''
+                  Configure services.swayidle to lock after `lockAfter` minutes, before
+                  sleep and on `loginctl lock-session`. Turn off to set up idle handling
+                  yourself; lock with `birdland-tarp ipc call tarp lock`.
+                '';
+              };
+              pamService = lib.mkOption {
+                type = lib.types.str;
+                default = "login";
+                description = ''
+                  PAM service (a file in /etc/pam.d) that checks the password. "login"
+                  exists on every NixOS system; for a dedicated one, add
+                  `security.pam.services.<name> = { };` to your NixOS configuration.
+                '';
+              };
+              wallpaper = lib.mkOption {
+                type = lib.types.nullOr wallpaperSource;
+                default = null;
+                description = "Image or folder behind the lock screen; null uses outfield's wallpaper, if any.";
+              };
+              fill = lib.mkOption {
+                type = lib.types.enum [
+                  "fill"
+                  "fit"
+                  "stretch"
+                  "center"
+                  "tile"
+                ];
+                default = cfg.outfield.fill;
+                defaultText = lib.literalExpression "config.programs.birdland.outfield.fill";
+                description = "How the wallpaper fits the screen.";
+              };
+            };
+            # A lock screen that stays down leaves the session locked with no way
+            # in, so keep restarting it; the new one locks again and can unlock.
+            unit.StartLimitIntervalSec = 0;
+            service.RestartSec = 1;
+            sessionVariables = {
+              TARP_CONFIG = "${pkgs.writeText "tarp.json" (
+                builtins.toJSON {
+                  wallpaper =
+                    if cfg.tarp.wallpaper != null then
+                      sourceString cfg.tarp.wallpaper
+                    else if cfg.outfield.enable && cfg.outfield.wallpaper != null then
+                      sourceString cfg.outfield.wallpaper
+                    else
+                      null;
+                  inherit (cfg.tarp) pamService fill;
+                }
+              )}";
+            };
+          };
         };
 
         enabledApps = lib.filterAttrs (name: _: cfg.${name}.enable) apps;
+
+        # Locks through the running tarp, then waits until the compositor
+        # confirms every monitor is covered: swayidle runs this before sleep
+        # and holds the suspend until it exits, so the desktop never shows on
+        # resume.
+        tarpLock = pkgs.writeShellScript "birdland-tarp-lock" ''
+          tarp=${lib.getExe (appPackage "tarp")}
+          "$tarp" ipc call tarp lock
+          for _ in {1..50}; do
+            [ "$("$tarp" ipc call tarp isSecure)" = true ] && exit 0
+            ${pkgs.coreutils}/bin/sleep 0.1
+          done
+          echo "birdland-tarp-lock: the lock screen did not confirm the lock" >&2
+          exit 1
+        '';
       in
       {
         options.programs.birdland = {
@@ -259,6 +337,24 @@
         ) apps;
 
         config = lib.mkIf cfg.enable {
+          warnings = lib.optional (cfg.tarp.enable && !cfg.systemd.enable) ''
+            programs.birdland.tarp locks the screen only while it is running. Enable
+            programs.birdland.systemd.enable, or start birdland-tarp with your session.
+          '';
+
+          # Lock after inactivity, before sleep and on `loginctl lock-session`.
+          services.swayidle = lib.mkIf (cfg.tarp.enable && cfg.tarp.swayidle) {
+            enable = true;
+            events = {
+              before-sleep = lib.mkDefault "${tarpLock}";
+              lock = lib.mkDefault "${tarpLock}";
+            };
+            timeouts = lib.optional (cfg.tarp.lockAfter != null) {
+              timeout = cfg.tarp.lockAfter * 60;
+              command = "${tarpLock}";
+            };
+          };
+
           home = {
             packages =
               (map appPackage (lib.attrNames enabledApps))
@@ -280,12 +376,14 @@
                   Description = app.description;
                   PartOf = [ "graphical-session.target" ];
                   After = [ "graphical-session.target" ];
-                };
+                }
+                // app.unit or { };
                 Service = {
                   ExecStart = lib.getExe (appPackage name);
                   Environment = lib.mapAttrsToList (var: value: "${var}=${value}") app.sessionVariables;
                   Restart = "always";
-                };
+                }
+                // app.service or { };
                 Install.WantedBy = [ "graphical-session.target" ];
               }
             ) enabledApps

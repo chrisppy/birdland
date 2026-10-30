@@ -39,7 +39,7 @@ Item {
         if (shuffle && images.length > 1) {
             do
                 index = Math.floor(Math.random() * images.length);
-            while (images[index] === priv.current);
+            while (images[index] === priv.current)
         } else {
             index = (images.indexOf(priv.current) + 1) % images.length;
         }

@@ -123,9 +123,11 @@
               BULLPEN_RIGHT = lib.concatStringsSep "," cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
             }
-            // lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null) {
-              BULLPEN_WEATHER_LOCATION = "${toString cfg.bullpen.weather.latitude},${toString cfg.bullpen.weather.longitude}";
-            };
+            //
+              lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null)
+                {
+                  BULLPEN_WEATHER_LOCATION = "${toString cfg.bullpen.weather.latitude},${toString cfg.bullpen.weather.longitude}";
+                };
           };
           dugout = {
             description = "Dugout App Launcher for Niri";

@@ -13,7 +13,8 @@
       system = pkgs.stdenv.hostPlatform.system;
       base24 = inputs.base24-themes.lib.base24;
 
-      theme = if builtins.isString cfg.theme.scheme then base24.themes.${cfg.theme.scheme} else cfg.theme.scheme;
+      theme =
+        if builtins.isString cfg.theme.scheme then base24.themes.${cfg.theme.scheme} else cfg.theme.scheme;
       gate = self.packages.${system}.gate.override {
         inherit theme;
         fontFamily = cfg.font.family;
@@ -127,7 +128,10 @@
           ];
         };
 
-        fonts.packages = [ pkgs.nerd-fonts.symbols-only ] ++ lib.optional (cfg.font.package != null) cfg.font.package;
+        fonts.packages = [
+          pkgs.nerd-fonts.symbols-only
+        ]
+        ++ lib.optional (cfg.font.package != null) cfg.font.package;
 
         # The greeter remembers the last user and session here.
         systemd.tmpfiles.rules = [

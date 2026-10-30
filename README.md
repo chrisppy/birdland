@@ -120,7 +120,7 @@ ______________________________________________________________________
 ## Configuration Options
 
 | Option | Type | Default | Description |
-| :----------------------------------- | :----------------- | :----------- | :----------------------------------------------------------------- |
+| :-------------------------------------------- | :--------------------- | :-------------------- | :---------------------------------------------------------------------------- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
 | `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |
@@ -160,12 +160,12 @@ and in what order. On side bars, left is the top and right the bottom. Any
 module can go in any part, a part can be empty (`[ ]`), and a module left out of
 all three isn't shown.
 
-The center stays centered on the bar. A long window title is shortened with
-"…" to fit; outside the center it is capped at a quarter of the bar. The
-workspaces pill stays flush against the screen edge wherever it is placed.
+The center stays centered on the bar. A long window title is shortened with "…"
+to fit; outside the center it is capped at a quarter of the bar. The workspaces
+pill stays flush against the screen edge wherever it is placed.
 
 | Module | Shows | Needs |
-| :-------------- | :------------------------------------------- | :--------------------------------------------------------------------- |
+| :-------------- | :--------------------------------------------- | :--------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
 | `title` | Focused window title (top/bottom bars only) | Niri |
 | `clock` | Time and date | Nothing |
@@ -260,8 +260,8 @@ ______________________________________________________________________
 
 ## Gate login screen (NixOS)
 
-Gate is a login screen for [greetd](https://sr.ht/~kennylevinsen/greetd/),
-shown by the [cage](https://github.com/cage-kiosk/cage) kiosk compositor, so it
+Gate is a login screen for [greetd](https://sr.ht/~kennylevinsen/greetd/), shown
+by the [cage](https://github.com/cage-kiosk/cage) kiosk compositor, so it
 appears on one monitor (the last one connected). Enable it in your NixOS
 configuration, not Home Manager:
 
@@ -277,12 +277,12 @@ configuration, not Home Manager:
 }
 ```
 
-It lists the users with `isNormalUser = true` (showing their `description`)
-and the installed Wayland sessions, remembers the last user and session, and
-has restart and shut down buttons.
+It lists the users with `isNormalUser = true` (showing their `description`) and
+the installed Wayland sessions, remembers the last user and session, and has
+restart and shut down buttons.
 
 | Option | Type | Default | Description |
-| :--------------------------------------------- | :------------------ | :------------------------ | :------------------------------------------------------------ |
+| :-------------------------------------- | :----------------- | :------------------------ | :----------------------------------------------------------- |
 | `programs.birdland.gate.enable` | boolean | `false` | Enable greetd with the Gate greeter. |
 | `programs.birdland.gate.users` | list of strings | all normal users | Users to choose from, in order. |
 | `programs.birdland.gate.defaultSession` | string or null | display manager's default | Session selected until someone picks another, e.g. `"niri"`. |

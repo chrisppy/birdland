@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pam
 import Quickshell.Wayland
+import Niri
 import modules.theme
 import modules.util
 
@@ -157,8 +158,26 @@ ShellRoot {
         }
     }
 
+    // For screenOff below.
+    Niri {
+        id: niri
+
+        Component.onCompleted: connect()
+    }
+
     IpcHandler {
         target: "tarp"
+
+        // Turn the monitors off (they come back on with any input); the
+        // Home Manager module runs this when idle. Works locked or not.
+        function screenOff(): bool {
+            const result = niri.sendRawAction({
+                PowerOffMonitors: {}
+            });
+            if (!result.ok)
+                console.warn("tarp: could not turn the monitors off:", result.error);
+            return result.ok;
+        }
 
         // Lock every monitor. Returns at once; see isSecure.
         function lock(): void {

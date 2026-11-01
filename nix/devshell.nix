@@ -15,6 +15,8 @@
           qt6.qtdeclarative
           qt6.qtbase
           niri
+          # notify-send, for trying Pressbox
+          libnotify
         ];
 
         # What the packages add: the icon font, and WebP/TIFF support for

@@ -32,6 +32,18 @@ run-outfield:
 next-wallpaper:
     nix run .#outfield -- ipc call outfield next
 
+# Run the Pressbox notification popups (stop other notification daemons first)
+run-pressbox:
+    nix run .#pressbox
+
+# Send a test notification to a running Pressbox
+test-notification:
+    notify-send -a Birdland "Batter up" "Pressbox is working"
+
+# Run the Jumbotron volume and brightness pop-ups
+run-jumbotron:
+    nix run .#jumbotron
+
 # Run the Tarp lock screen in the background (it does not lock by itself)
 run-tarp:
     nix run .#tarp

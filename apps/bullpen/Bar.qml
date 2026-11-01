@@ -21,7 +21,7 @@ PanelWindow {
     // that part empty; unset uses the default.
     readonly property var leftModules: Env.list("BULLPEN_LEFT", "workspaces")
     readonly property var centerModules: Env.list("BULLPEN_CENTER", "title")
-    readonly property var rightModules: Env.list("BULLPEN_RIGHT", "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,clock")
+    readonly property var rightModules: Env.list("BULLPEN_RIGHT", "media,cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,tray,clock")
     readonly property var allModules: leftModules.concat(centerModules, rightModules)
 
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
@@ -39,7 +39,9 @@ PanelWindow {
             network: networkModule,
             volume: volumeModule,
             microphone: microphoneModule,
-            battery: batteryModule
+            battery: batteryModule,
+            tray: trayModule,
+            media: mediaModule
         })
 
     implicitWidth: vertical ? thickness : 0
@@ -274,6 +276,19 @@ PanelWindow {
     Component {
         id: batteryModule
         Battery {
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: trayModule
+        Tray {
+            window: bar
+            edge: bar.edge
+        }
+    }
+    Component {
+        id: mediaModule
+        Media {
             vertical: bar.vertical
         }
     }

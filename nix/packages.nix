@@ -84,6 +84,14 @@
           name = "outfield";
           wrapperArgs = imageFormats;
         };
+        # Notification popups.
+        pressbox = mkApp {
+          name = "pressbox";
+        };
+        # Volume and brightness pop-ups.
+        jumbotron = mkApp {
+          name = "jumbotron";
+        };
         # The lock screen; it runs in the background and locks over IPC.
         tarp = mkApp {
           name = "tarp";
@@ -102,6 +110,8 @@
             dugout
             lineup
             outfield
+            pressbox
+            jumbotron
             tarp
           ];
         };

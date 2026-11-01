@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Niri
+import modules.util
 
 // Dugout: application launcher. Runs as its own Quickshell instance, starts
 // hidden, and is toggled with `birdland-dugout ipc call dugout toggle`.
@@ -14,25 +15,10 @@ ShellRoot {
     // each time Dugout opens. null lets Quickshell use the primary monitor.
     property var screen: null
 
-    function focusedScreen() {
-        const workspaces = niri.workspaces;
-        for (let i = 0; i < workspaces.count; i++) {
-            const workspace = workspaces.get(i);
-            if (!workspace.isFocused)
-                continue;
-            const screens = Quickshell.screens;
-            for (let j = 0; j < screens.length; j++) {
-                if (screens[j].name === workspace.output)
-                    return screens[j];
-            }
-        }
-        return null;
-    }
-
     function show() {
         if (open)
             return;
-        screen = focusedScreen();
+        screen = Screens.focused(niri);
         open = true;
     }
 

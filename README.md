@@ -13,14 +13,18 @@ individually or as a complete suite:
 
 - **`bullpen`**: A status bar on every monitor, attachable to any screen edge
   (`top`, `bottom`, `left`, `right`), with that monitor's workspaces, the
-  focused window, a clock, and status indicators for CPU, memory, GPU,
-  temperature, weather, network, volume, microphone and battery.
+  focused window, a clock, the media player, tray icons, and status indicators
+  for CPU, memory, GPU, temperature, weather, network, volume, microphone and
+  battery.
 - **`dugout`**: A quick application launcher that opens on the focused monitor.
 - **`lineup`**: A dock of favorite and running apps on every monitor.
 - **`outfield`**: Wallpapers on every monitor: an image, or a folder that
   rotates, with optional per-monitor choices.
+- **`pressbox`**: Notification popups on the focused monitor.
+- **`jumbotron`**: A pop-up on the focused monitor when the volume, microphone
+  mute or screen brightness changes.
 - **`tarp`**: A lock screen that locks on idle, before sleep and on
-  `loginctl lock-session`.
+  `loginctl lock-session`, and turns the monitors off when idle.
 - **`gate`**: A login screen for greetd, set up through the NixOS module, with a
   user list, session list and power buttons.
 
@@ -77,6 +81,7 @@ Import the Home Manager module provided by the flake and enable the suite:
       enable = true;
       position = "top";
       units = "imperial";
+      clock.format = "h:mm AP  ddd MMM d"; # 12-hour time, US-style date
       weather = {
         latitude = 39.28;
         longitude = -76.62;
@@ -85,7 +90,7 @@ Import the Home Manager module provided by the flake and enable the suite:
       layout = {
         left = [ "workspaces" ];
         center = [ "title" ];
-        right = [ "cpu" "memory" "gpu" "temperature" "weather" "network" "volume" "microphone" "battery" "clock" ];
+        right = [ "media" "cpu" "memory" "gpu" "temperature" "weather" "network" "volume" "microphone" "battery" "tray" "clock" ];
       };
     };
 
@@ -110,9 +115,21 @@ Import the Home Manager module provided by the flake and enable the suite:
       interval = 30;                       # minutes between images from a folder
     };
 
+    pressbox = {
+      enable = true;
+      position = "top-right";
+      timeout = 5; # seconds
+    };
+
+    jumbotron = {
+      enable = true;
+      position = "bottom";
+    };
+
     tarp = {
       enable = true;
-      lockAfter = 10; # minutes without input; null to never lock on idle
+      lockAfter = 10;      # minutes without input; null to never lock on idle
+      screenOffAfter = 15; # minutes without input; null to leave monitors on
     };
   };
 }
@@ -123,7 +140,7 @@ ______________________________________________________________________
 ## Configuration Options
 
 | Option | Type | Default | Description |
-| :-------------------------------------------- | :--------------------- | :-------------------- | :---------------------------------------------------------------------------- |
+| :----------------------------------------------- | :--------------------- | :--------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
 | `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |
@@ -134,6 +151,8 @@ ______________________________________________________________________
 | `programs.birdland.bullpen.layout.left` | list of modules | `[ "workspaces" ]` | Left part of the bar (top on side bars), in order. |
 | `programs.birdland.bullpen.layout.center` | list of modules | `[ "title" ]` | Center of the bar, in order. |
 | `programs.birdland.bullpen.layout.right` | list of modules | indicators, `"clock"` | Right part of the bar (bottom on side bars), in order. |
+| `programs.birdland.bullpen.clock.format` | string | `"hh:mm dd MMM, yyyy"` | Clock on top/bottom bars, in [Qt's date format](https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method). |
+| `programs.birdland.bullpen.clock.verticalFormat` | string | time over date | Clock on side bars; each `\n` starts a new line. |
 | `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |
 | `programs.birdland.bullpen.weather.latitude` | number or null | `null` | Weather location; the weather is hidden until both are set. |
 | `programs.birdland.bullpen.weather.longitude` | number or null | `null` | Weather location. |
@@ -147,8 +166,14 @@ ______________________________________________________________________
 | `programs.birdland.outfield.interval` | integer | `30` | Minutes between images from a folder; `0` keeps the first. |
 | `programs.birdland.outfield.shuffle` | boolean | `true` | Random order instead of file-name order. |
 | `programs.birdland.outfield.fill` | enum | `"fill"` | `fill` (crop to cover), `fit`, `stretch`, `center` or `tile`. |
+| `programs.birdland.pressbox.enable` | boolean | `false` | Enable the Pressbox notification popups. |
+| `programs.birdland.pressbox.position` | enum | `"top-right"` | Corner: `top-right`, `top-left`, `bottom-right` or `bottom-left`. |
+| `programs.birdland.pressbox.timeout` | integer | `5` | Seconds a popup stays when the app doesn't say; critical ones stay. |
+| `programs.birdland.jumbotron.enable` | boolean | `false` | Enable the Jumbotron volume and brightness pop-ups. |
+| `programs.birdland.jumbotron.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.tarp.enable` | boolean | `false` | Enable the Tarp lock screen. Needs `systemd.enable`, or start it yourself. |
 | `programs.birdland.tarp.lockAfter` | integer or null | `10` | Minutes without input before locking; `null` never locks on idle. |
+| `programs.birdland.tarp.screenOffAfter` | integer or null | `15` | Minutes without input before the monitors turn off; `null` leaves them on. |
 | `programs.birdland.tarp.swayidle` | boolean | `true` | Set up swayidle to lock on idle, before sleep and on `loginctl lock-session`. |
 | `programs.birdland.tarp.pamService` | string | `"login"` | PAM service that checks the password. |
 | `programs.birdland.tarp.wallpaper` | path / string or null | `null` | Image or folder behind the lock; `null` uses Outfield's. |
@@ -168,7 +193,7 @@ to fit; outside the center it is capped at a quarter of the bar. The workspaces
 pill stays flush against the screen edge wherever it is placed.
 
 | Module | Shows | Needs |
-| :-------------- | :---------------------------------------------------------------- | :--------------------------------------------------------------- |
+| :-------------- | :----------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
 | `title` | Focused window title, on its monitor's bar (top/bottom bars only) | Niri |
 | `clock` | Time and date | Nothing |
@@ -180,9 +205,11 @@ pill stays flush against the screen edge wherever it is placed.
 | `volume` | Default output; click mutes, scroll changes it | PipeWire with WirePlumber |
 | `microphone` | Default input; click mutes, scroll changes it | PipeWire with WirePlumber |
 | `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |
+| `media` | The playing track; click plays/pauses, right click next, middle click previous | A player with MPRIS (most do) |
+| `tray` | Tray icons; click activates, right click opens the menu | Apps with StatusNotifierItem icons |
 
-Modules with nothing to show (no battery, no GPU sensor, no weather location)
-hide themselves. Icons come from the Symbols Nerd Font, which the Home Manager
+Modules with nothing to show (no battery, no GPU sensor, no weather location, no
+media player, no tray icons) hide themselves. Icons come from the Symbols Nerd Font, which the Home Manager
 module installs.
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
@@ -197,6 +224,11 @@ screen, which is awake anyway. NVIDIA is only polled when there is no AMD or
 Intel GPU, so Intel + NVIDIA laptops leave the NVIDIA GPU asleep. On a machine
 whose only readable GPU is a discrete one that sleeps, leave `gpu` out of the
 layout to save power.
+
+The clock uses Qt's date format: the default `hh:mm dd MMM, yyyy` shows
+"17:24 01 Nov, 2026", and `h:mm AP  ddd MMM d` shows "5:24 PM  Sun Nov 1". A
+format with seconds (`ss`) updates every second. The tray hides icons their apps
+mark as idle ("passive"), as Waybar does.
 
 The weather request sends only the configured coordinates to
 [Open-Meteo](https://open-meteo.com), every 15 minutes (a minute after a failed
@@ -236,6 +268,46 @@ layer-rule {
 
 ______________________________________________________________________
 
+## Pressbox notifications
+
+Pressbox is the session's notification server, so it replaces mako, dunst or
+swaync; run only one of them. Popups appear in a corner of the focused monitor,
+newest first, below the bar. Click one for the app's default action (or to
+close it), use its buttons for the others, or the cross to dismiss it. A popup
+stays while the pointer is over it, and critical ones (a low battery) stay until
+dismissed. There is no history: notifications are gone once closed.
+
+Do not disturb drops all but critical notifications:
+
+```sh
+birdland-pressbox ipc call pressbox toggleDnd    # prints the new state
+birdland-pressbox ipc call pressbox setDnd true
+birdland-pressbox ipc call pressbox dismissAll
+```
+
+______________________________________________________________________
+
+## Jumbotron pop-ups
+
+Jumbotron shows a short pop-up on the focused monitor when the volume, the
+microphone's mute or the screen brightness changes, whatever changed it. It
+doesn't change anything itself, so bind your keys to the usual tools in your
+Niri config, for example:
+
+```kdl
+XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+" "-l" "1.0"; }
+XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
+XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+```
+
+Brightness is read from `/sys/class/backlight`, so it shows on laptops and is
+silent on desktop monitors.
+
+______________________________________________________________________
+
 ## Tarp lock screen
 
 Tarp runs in the background as a user service and locks every monitor when
@@ -253,6 +325,10 @@ The password is checked by PAM's `login` service, which exists on every NixOS
 system and includes fingerprint login if you've enabled it there. To use a
 dedicated service, add `security.pam.services.birdland-tarp = { };` to your
 NixOS configuration and set `tarp.pamService = "birdland-tarp";`.
+
+With `screenOffAfter` (15 minutes by default) the monitors also turn off when
+idle; any input turns them back on. This uses swayidle too, so it needs
+`tarp.swayidle`.
 
 If Tarp crashes while locked, Niri keeps the screens locked (a solid color).
 systemd restarts Tarp, which notices and locks again, so you can unlock as

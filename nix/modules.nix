@@ -38,6 +38,8 @@
           "volume"
           "microphone"
           "battery"
+          "tray"
+          "media"
         ];
 
         # A wallpaper image or folder: a Nix path (copied into the store) or a
@@ -64,6 +66,7 @@
                 right = lib.mkOption {
                   type = lib.types.listOf bullpenModule;
                   default = [
+                    "media"
                     "cpu"
                     "memory"
                     "gpu"
@@ -73,12 +76,34 @@
                     "volume"
                     "microphone"
                     "battery"
+                    "tray"
                     "clock"
                   ];
                   description = ''
                     Modules in the right part of the bar (the bottom on side bars), in
                     order. Modules with nothing to show (no battery, no GPU sensor, no
-                    weather location) hide themselves.
+                    weather location, no media player, no tray icons) hide themselves.
+                  '';
+                };
+              };
+              clock = {
+                format = lib.mkOption {
+                  type = lib.types.str;
+                  default = "hh:mm dd MMM, yyyy";
+                  example = "h:mm AP  ddd MMM d";
+                  description = ''
+                    Clock on top/bottom bars, in Qt's date format
+                    (<https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method>):
+                    `h:mm AP` is 12-hour time, `ddd MMM d` a US-style date.
+                  '';
+                };
+                verticalFormat = lib.mkOption {
+                  type = lib.types.str;
+                  default = "hh\nmm\n\ndd\nMMM";
+                  example = "h\nmm\nAP\n\nMMM\nd";
+                  description = ''
+                    Clock on side bars, stacked: each line break (a newline, or `\n`)
+                    starts a new line.
                   '';
                 };
               };
@@ -111,6 +136,11 @@
               BULLPEN_CENTER = lib.concatStringsSep "," cfg.bullpen.layout.center;
               BULLPEN_RIGHT = lib.concatStringsSep "," cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
+              BULLPEN_CLOCK_FORMAT = cfg.bullpen.clock.format;
+              # Line breaks as "\n", which the bar reads as line breaks.
+              BULLPEN_CLOCK_VERTICAL_FORMAT =
+                lib.replaceStrings [ "\n" ] [ "\\n" ]
+                  cfg.bullpen.clock.verticalFormat;
             }
             //
               lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null)
@@ -187,6 +217,39 @@
               )}";
             };
           };
+          pressbox = {
+            description = "Pressbox Notification Popups for Niri";
+            extraOptions = {
+              position = lib.mkOption {
+                type = lib.types.enum [
+                  "top-right"
+                  "top-left"
+                  "bottom-right"
+                  "bottom-left"
+                ];
+                default = "top-right";
+                description = "Corner of the focused monitor the popups show in.";
+              };
+              timeout = lib.mkOption {
+                type = lib.types.ints.positive;
+                default = 5;
+                description = "Seconds a popup stays, for apps that don't choose; critical ones stay until dismissed.";
+              };
+            };
+            sessionVariables = {
+              PRESSBOX_POSITION = cfg.pressbox.position;
+              PRESSBOX_TIMEOUT = toString cfg.pressbox.timeout;
+            };
+          };
+          jumbotron = {
+            description = "Jumbotron Volume and Brightness Pop-ups for Niri";
+            extraOptions = {
+              position = shared.edge "bottom" "Screen edge the pop-up shows near.";
+            };
+            sessionVariables = {
+              JUMBOTRON_POSITION = cfg.jumbotron.position;
+            };
+          };
           tarp = {
             description = "Tarp Lock Screen for Niri";
             extraOptions = {
@@ -194,6 +257,14 @@
                 type = lib.types.nullOr lib.types.ints.positive;
                 default = 10;
                 description = "Lock after this many minutes without input; null never locks on idle.";
+              };
+              screenOffAfter = lib.mkOption {
+                type = lib.types.nullOr lib.types.ints.positive;
+                default = 15;
+                description = ''
+                  Turn the monitors off after this many minutes without input (any input
+                  turns them back on); null leaves them on. Part of the swayidle setup.
+                '';
               };
               swayidle = lib.mkOption {
                 type = lib.types.bool;
@@ -244,6 +315,19 @@
           };
         };
 
+        # One Environment= assignment, quoted so spaces (the clock format),
+        # quotes, backslashes, "%" and line breaks reach the app unchanged.
+        systemdQuote =
+          assignment:
+          let
+            escaped = lib.replaceStrings [ "\\" "\"" "%" "\n" ] [ "\\\\" "\\\"" "%%" "\\n" ] assignment;
+          in
+          "\"${escaped}\"";
+        serviceEnvironment = lib.mapAttrsToList (var: value: systemdQuote "${var}=${value}");
+
+        # Another notification daemon would hold the D-Bus name pressbox needs.
+        otherNotifier = config.services.mako.enable || config.services.dunst.enable;
+
         enabledApps = lib.filterAttrs (name: _: cfg.${name}.enable) apps;
 
         # Locks through the running tarp, then waits until the compositor
@@ -278,10 +362,15 @@
         ) apps;
 
         config = lib.mkIf cfg.enable {
-          warnings = lib.optional (cfg.tarp.enable && !cfg.systemd.enable) ''
-            programs.birdland.tarp locks the screen only while it is running. Enable
-            programs.birdland.systemd.enable, or start birdland-tarp with your session.
-          '';
+          warnings =
+            lib.optional (cfg.tarp.enable && !cfg.systemd.enable) ''
+              programs.birdland.tarp locks the screen only while it is running. Enable
+              programs.birdland.systemd.enable, or start birdland-tarp with your session.
+            ''
+            ++ lib.optional (cfg.pressbox.enable && otherNotifier) ''
+              programs.birdland.pressbox and services.mako or services.dunst are both
+              notification servers, and only one can run; disable one of them.
+            '';
 
           # Lock after inactivity, before sleep and on `loginctl lock-session`.
           services.swayidle = lib.mkIf (cfg.tarp.enable && cfg.tarp.swayidle) {
@@ -290,10 +379,15 @@
               before-sleep = lib.mkDefault "${tarpLock}";
               lock = lib.mkDefault "${tarpLock}";
             };
-            timeouts = lib.optional (cfg.tarp.lockAfter != null) {
-              timeout = cfg.tarp.lockAfter * 60;
-              command = "${tarpLock}";
-            };
+            timeouts =
+              lib.optional (cfg.tarp.lockAfter != null) {
+                timeout = cfg.tarp.lockAfter * 60;
+                command = "${tarpLock}";
+              }
+              ++ lib.optional (cfg.tarp.screenOffAfter != null) {
+                timeout = cfg.tarp.screenOffAfter * 60;
+                command = "${lib.getExe (appPackage "tarp")} ipc call tarp screenOff";
+              };
           };
 
           home = {
@@ -325,7 +419,7 @@
                 // app.unit or { };
                 Service = {
                   ExecStart = lib.getExe (appPackage name);
-                  Environment = lib.mapAttrsToList (var: value: "${var}=${value}") app.sessionVariables;
+                  Environment = serviceEnvironment app.sessionVariables;
                   Restart = "always";
                   # systemd gives up after 5 starts in 10 s. Waiting 3 s between
                   # tries stays under that, so an app that starts before the

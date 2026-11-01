@@ -165,19 +165,17 @@ PanelWindow {
         }
     }
 
-    // Shared by the cpu, memory, gpu and temperature modules; only samples
-    // while one of them is in the bar.
-    SystemStats {
-        id: systemStats
-
-        running: ["cpu", "memory", "gpu", "temperature"].some(name => bar.allModules.includes(name))
-        sampleGpu: bar.allModules.includes("gpu")
-    }
+    // System statistics, shared by every bar (see shell.qml), and whether
+    // this bar shows any of them.
+    required property SystemStats stats
+    readonly property bool usesStats: ["cpu", "memory", "gpu", "temperature"].some(name => allModules.includes(name))
+    readonly property bool usesGpu: allModules.includes("gpu")
 
     Component {
         id: workspacesModule
         Workspaces {
             edge: bar.edge
+            output: bar.screen?.name ?? ""
         }
     }
     // Focused window title. Top/bottom bars only; long titles are elided.
@@ -207,21 +205,21 @@ PanelWindow {
     Component {
         id: cpuModule
         Cpu {
-            stats: systemStats
+            stats: bar.stats
             vertical: bar.vertical
         }
     }
     Component {
         id: memoryModule
         Memory {
-            stats: systemStats
+            stats: bar.stats
             vertical: bar.vertical
         }
     }
     Component {
         id: gpuModule
         Gpu {
-            stats: systemStats
+            stats: bar.stats
             vertical: bar.vertical
             imperial: bar.imperial
         }
@@ -229,7 +227,7 @@ PanelWindow {
     Component {
         id: temperatureModule
         Temperature {
-            stats: systemStats
+            stats: bar.stats
             vertical: bar.vertical
             imperial: bar.imperial
         }

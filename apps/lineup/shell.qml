@@ -2,10 +2,16 @@
 import QtQuick
 import Quickshell
 
-// Lineup: a dock of favorite and running apps. Runs as its own Quickshell instance.
+// Lineup: a dock of favorite and running apps on every monitor. Runs as its
+// own Quickshell instance.
 ShellRoot {
-    LazyLoader {
-        active: true
-        component: LineupWindow {}
+    Variants {
+        model: Quickshell.screens
+
+        LineupWindow {
+            required property var modelData
+
+            screen: modelData
+        }
     }
 }

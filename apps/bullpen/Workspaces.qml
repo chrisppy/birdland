@@ -10,14 +10,16 @@ Rectangle {
     // the screen, and runs vertically on left/right bars.
     property string edge: "top"
     readonly property bool vertical: Edges.vertical(edge)
+    // The monitor (Niri output name) whose workspaces to show; "" shows all.
+    property string output: ""
     // Sits flush against the screen edge, wherever it is in the bar.
     readonly property bool hugsEdge: true
 
-    // The pill always has room for maxDots workspace dots.
+    // Shows up to maxDots dots; the pill fits the dots shown.
     readonly property int maxDots: 11
     readonly property int dotSize: 15
     readonly property int thickness: 25
-    readonly property int length: maxDots * dotSize + (maxDots - 1) * Theme.spacingSmall + 2 * Theme.spacingMedium
+    readonly property int length: (vertical ? dots.implicitHeight : dots.implicitWidth) + 2 * Theme.spacingMedium
 
     color: Theme.surfaceAlt
     implicitWidth: vertical ? thickness : length
@@ -29,6 +31,8 @@ Rectangle {
     bottomRightRadius: Edges.corner(edge, "bottomRight", Theme.radiusMedium)
 
     Flow {
+        id: dots
+
         flow: root.vertical ? Flow.TopToBottom : Flow.LeftToRight
         spacing: Theme.spacingSmall
 
@@ -48,7 +52,9 @@ Rectangle {
                 required property int index
                 required property var modelData
 
-                visible: index < root.maxDots
+                // Only this monitor's workspaces, up to maxDots of them; Niri
+                // numbers each monitor's workspaces from 1.
+                visible: (root.output === "" || modelData.output === root.output) && modelData.index <= root.maxDots
                 width: root.dotSize
                 height: root.dotSize
 

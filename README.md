@@ -11,13 +11,12 @@ through Nix Flakes and Home Manager. Designed with native support for the
 Birdland is split into six Quickshell applications, which can be used
 individually or as a complete suite:
 
-- **`bullpen`**: A flexible status bar attachable to any screen edge (`top`,
-  `bottom`, `left`, `right`), with workspaces, the focused window, a clock, and
-  status indicators for CPU, memory, GPU, temperature, weather, network, volume,
-  microphone and battery.
-- **`dugout`**: A quick application launcher.
-- **`lineup`**: A customizable favorite apps dock for launching and managing
-  pinned applications.
+- **`bullpen`**: A status bar on every monitor, attachable to any screen edge
+  (`top`, `bottom`, `left`, `right`), with that monitor's workspaces, the
+  focused window, a clock, and status indicators for CPU, memory, GPU,
+  temperature, weather, network, volume, microphone and battery.
+- **`dugout`**: A quick application launcher that opens on the focused monitor.
+- **`lineup`**: A dock of favorite and running apps on every monitor.
 - **`outfield`**: Wallpapers on every monitor: an image, or a folder that
   rotates, with optional per-monitor choices.
 - **`tarp`**: A lock screen that locks on idle, before sleep and on

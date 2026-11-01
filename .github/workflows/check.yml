@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: read
+  # cache-nix-action purges this branch's old caches.
+  actions: write
 
 jobs:
   flake-check:
@@ -19,6 +21,19 @@ jobs:
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
+
+      # Keeps the Nix store (Quickshell and friends) between runs, and
+      # purges caches nobody has used for a day and a half.
+      - name: Cache Nix store
+        uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: P1DT12H
+          purge-primary-key: never
 
       - name: Run flake checks
         run: nix flake check --print-build-logs

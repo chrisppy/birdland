@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import Niri
+import modules.util
 
 ShellRoot {
     id: root
@@ -27,6 +28,7 @@ ShellRoot {
 
             screen: modelData
             stats: sharedStats
+            weather: sharedWeather
         }
     }
 
@@ -38,5 +40,16 @@ ShellRoot {
 
         running: barList.some(bar => bar.usesStats)
         sampleGpu: barList.some(bar => bar.usesGpu)
+    }
+
+    // One weather fetch for all bars, while any of them shows the weather.
+    // BULLPEN_WEATHER_LOCATION is "latitude,longitude"; without it the
+    // weather stays hidden.
+    WeatherData {
+        id: sharedWeather
+
+        location: Env.get("BULLPEN_WEATHER_LOCATION")
+        imperial: Env.get("BULLPEN_UNITS").toLowerCase() === "imperial"
+        running: sharedStats.barList.some(bar => bar.usesWeather)
     }
 }

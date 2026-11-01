@@ -2,41 +2,11 @@
 import QtQuick
 import modules.theme
 
-// Current weather from Open-Meteo (open-meteo.com, no API key). Needs a
-// `location` of "latitude,longitude"; refreshes every 15 minutes and on click.
+// The current weather, from the shared WeatherData; click to refresh it.
 Indicator {
     id: root
 
-    property string location: ""
-
-    property real temperature: NaN
-    property int code: -1
-    property bool day: true
-
-    function refresh() {
-        const [lat, lon] = location.split(",").map(s => s.trim());
-        if (!lat || !lon)
-            return;
-        const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
-                return;
-            if (xhr.status !== 200) {
-                console.warn("bullpen: weather request failed with status", xhr.status);
-                return;
-            }
-            try {
-                const current = JSON.parse(xhr.responseText).current;
-                temperature = current.temperature_2m;
-                code = current.weather_code;
-                day = current.is_day === 1;
-            } catch (e) {
-                console.warn("bullpen: unexpected weather response:", e);
-            }
-        };
-        xhr.open("GET", "https://api.open-meteo.com/v1/forecast" + `?latitude=${lat}&longitude=${lon}` + "&current=temperature_2m,weather_code,is_day" + `&temperature_unit=${imperial ? "fahrenheit" : "celsius"}`);
-        xhr.send();
-    }
+    required property WeatherData weather
 
     // WMO weather interpretation codes, as used by Open-Meteo.
     function glyph(code, day) {
@@ -82,18 +52,10 @@ Indicator {
         }
     }
 
-    available: location !== "" && code >= 0
+    available: weather.location !== "" && weather.code >= 0
     interactive: true
-    icon: glyph(code, day)
-    label: Math.round(temperature) + "°"
+    icon: glyph(weather.code, weather.day)
+    label: Math.round(weather.temperature) + "°"
 
-    onClicked: refresh()
-
-    Timer {
-        interval: 15 * 60 * 1000
-        running: root.location !== ""
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
-    }
+    onClicked: weather.refresh()
 }

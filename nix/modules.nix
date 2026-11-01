@@ -105,8 +105,6 @@
                 };
               };
             };
-            # Icon glyphs for the status indicators.
-            packages = [ pkgs.nerd-fonts.symbols-only ];
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
               BULLPEN_LEFT = lib.concatStringsSep "," cfg.bullpen.layout.left;
@@ -301,7 +299,9 @@
           home = {
             packages =
               (map appPackage (lib.attrNames enabledApps))
-              ++ lib.concatMap (app: app.packages or [ ]) (lib.attrValues enabledApps)
+              # Icon glyphs: bullpen's indicators, and tarp's and the shared
+              # controls' buttons.
+              ++ [ pkgs.nerd-fonts.symbols-only ]
               ++ (lib.optional (cfg.font.package != null) cfg.font.package);
 
             sessionVariables = lib.foldl' (acc: app: acc // app.sessionVariables) { } (

@@ -26,8 +26,6 @@ PanelWindow {
 
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
     readonly property bool imperial: Env.get("BULLPEN_UNITS").toLowerCase() === "imperial"
-    // "latitude,longitude" for the weather; it stays hidden without one.
-    readonly property string weatherLocation: Env.get("BULLPEN_WEATHER_LOCATION")
 
     readonly property var modules: ({
             workspaces: workspacesModule,
@@ -170,6 +168,9 @@ PanelWindow {
     required property SystemStats stats
     readonly property bool usesStats: ["cpu", "memory", "gpu", "temperature"].some(name => allModules.includes(name))
     readonly property bool usesGpu: allModules.includes("gpu")
+    // The weather, also shared by every bar.
+    required property WeatherData weather
+    readonly property bool usesWeather: allModules.includes("weather")
 
     Component {
         id: workspacesModule
@@ -186,8 +187,19 @@ PanelWindow {
             // Set by the section: the room it has. Longer titles are elided.
             property real maxWidth: Number.POSITIVE_INFINITY
 
+            // Only the bar on the focused window's monitor shows its title.
+            readonly property var window: niri.focusedWindow
+            readonly property bool here: {
+                if (!window)
+                    return false;
+                const workspaces = niri.workspaces;
+                workspaces.count; // re-evaluate as workspaces come and go
+                const i = workspaces.indexOfId(window.workspaceId);
+                return i < 0 || !bar.screen || workspaces.get(i).output === bar.screen.name;
+            }
+
             width: Math.min(implicitWidth, maxWidth)
-            text: niri.focusedWindow?.title ?? ""
+            text: here ? window.title : ""
             color: Theme.textBright
             elide: Text.ElideRight
             font {
@@ -235,9 +247,8 @@ PanelWindow {
     Component {
         id: weatherModule
         Weather {
-            location: bar.weatherLocation
+            weather: bar.weather
             vertical: bar.vertical
-            imperial: bar.imperial
         }
     }
     Component {

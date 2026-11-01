@@ -27,6 +27,7 @@ Scope {
                 return;
             if (xhr.status !== 200) {
                 console.warn("bullpen: weather request failed with status", xhr.status);
+                retry.restart();
                 return;
             }
             try {
@@ -34,8 +35,10 @@ Scope {
                 temperature = current.temperature_2m;
                 code = current.weather_code;
                 day = current.is_day === 1;
+                retry.stop();
             } catch (e) {
                 console.warn("bullpen: unexpected weather response:", e);
+                retry.restart();
             }
         };
         xhr.open("GET", "https://api.open-meteo.com/v1/forecast" + `?latitude=${lat}&longitude=${lon}` + "&current=temperature_2m,weather_code,is_day" + `&temperature_unit=${imperial ? "fahrenheit" : "celsius"}`);
@@ -48,5 +51,18 @@ Scope {
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()
+    }
+
+    // After a failed request (often the network not being up yet at login),
+    // try again in a minute rather than at the next 15-minute refresh.
+    Timer {
+        id: retry
+
+        interval: 60 * 1000
+        running: false
+        onTriggered: {
+            if (root.running)
+                root.refresh();
+        }
     }
 }

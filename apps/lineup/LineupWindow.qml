@@ -57,7 +57,8 @@ PanelWindow {
     }
 
     // Window app IDs don't always equal the desktop entry ID (for example
-    // "firefox" vs "org.mozilla.firefox"), so compare a few ways.
+    // "firefox" vs "org.mozilla.firefox"), so compare a few ways, ending with
+    // the lookup runningEntries uses to find an app ID's entry.
     function matches(entry, appId) {
         const app = appId.toLowerCase();
         if (app === "")
@@ -65,7 +66,9 @@ PanelWindow {
 
         const id = entry.id.toLowerCase();
         const wmClass = entry.startupClass.toLowerCase();
-        return app === id || (wmClass !== "" && app === wmClass) || id.endsWith("." + app) || app.endsWith("." + id);
+        if (app === id || (wmClass !== "" && app === wmClass) || id.endsWith("." + app) || app.endsWith("." + id))
+            return true;
+        return (DesktopEntries.byId(appId) ?? DesktopEntries.heuristicLookup(appId))?.id === entry.id;
     }
 
     // A zero-sized layer surface is invalid, so only show with something in it.

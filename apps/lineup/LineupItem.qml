@@ -23,7 +23,7 @@ Item {
     // Launch the app if it isn't running, otherwise focus its next window.
     function activate() {
         if (!running) {
-            entry.execute();
+            Apps.launch(entry, niri);
             return;
         }
         const current = windows.findIndex(t => t.activated);
@@ -75,7 +75,7 @@ Item {
         // Left click launches or focuses; middle click always opens a new instance.
         onClicked: event => {
             if (event.button === Qt.MiddleButton)
-                root.entry.execute();
+                Apps.launch(root.entry, niri);
             else
                 root.activate();
         }

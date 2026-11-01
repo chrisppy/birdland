@@ -24,6 +24,10 @@ individually or as a complete suite:
 - **`gate`**: A login screen for greetd, set up through the NixOS module, with a
   user list, session list and power buttons.
 
+Dugout and Lineup start apps through Niri, so each app runs in its own systemd
+scope: restarting either service (Home Manager does when it changes) leaves the
+apps open.
+
 ______________________________________________________________________
 
 ## Installation
@@ -166,7 +170,7 @@ pill stays flush against the screen edge wherever it is placed.
 | Module | Shows | Needs |
 | :-------------- | :--------------------------------------------- | :--------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
-| `title` | Focused window title (top/bottom bars only) | Niri |
+| `title` | Focused window title, on its monitor's bar (top/bottom bars only) | Niri |
 | `clock` | Time and date | Nothing |
 | `cpu`, `memory` | Usage | Nothing (`/proc`) |
 | `gpu` | Usage, and temperature when available | AMD, Intel (`i915`, `xe`): nothing (sysfs). NVIDIA: `nvidia-smi` |
@@ -195,8 +199,8 @@ whose only readable GPU is a discrete one that sleeps, leave `gpu` out of the
 layout to save power.
 
 The weather request sends only the configured coordinates to
-[Open-Meteo](https://open-meteo.com), every 15 minutes; click the weather to
-refresh it.
+[Open-Meteo](https://open-meteo.com), every 15 minutes (a minute after a failed
+request); click the weather to refresh it.
 
 ______________________________________________________________________
 

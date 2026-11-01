@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import modules.theme
+import modules.util
 
 PanelWindow {
     id: root
@@ -59,7 +60,7 @@ PanelWindow {
     function launch(app) {
         if (!app)
             return;
-        app.execute();
+        Apps.launch(app, niri);
         root.closeRequested();
     }
 

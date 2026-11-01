@@ -180,10 +180,11 @@ PanelWindow {
         }
     }
     // Focused window title. Top/bottom bars only; long titles are elided.
+    // Hidden while empty, so it leaves no gap on the other monitors' bars.
     Component {
         id: titleModule
         Text {
-            readonly property bool available: !bar.vertical
+            readonly property bool available: !bar.vertical && text !== ""
             // Set by the section: the room it has. Longer titles are elided.
             property real maxWidth: Number.POSITIVE_INFINITY
 

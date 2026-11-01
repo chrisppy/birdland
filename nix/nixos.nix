@@ -11,10 +11,11 @@
     let
       cfg = config.programs.birdland.gate;
       system = pkgs.stdenv.hostPlatform.system;
-      base24 = inputs.base24-themes.lib.base24;
-
-      theme =
-        if builtins.isString cfg.theme.scheme then base24.themes.${cfg.theme.scheme} else cfg.theme.scheme;
+      shared = import ./_options.nix {
+        inherit lib;
+        base24 = inputs.base24-themes.lib.base24;
+      };
+      theme = shared.resolveTheme cfg.theme.scheme;
       gate = self.packages.${system}.gate.override {
         inherit theme;
         fontFamily = cfg.font.family;
@@ -73,38 +74,9 @@
           '';
         };
 
-        fill = lib.mkOption {
-          type = lib.types.enum [
-            "fill"
-            "fit"
-            "stretch"
-            "center"
-            "tile"
-          ];
-          default = "fill";
-          description = "How the wallpaper fits the screen.";
-        };
-
-        theme.scheme = lib.mkOption {
-          type = lib.types.either (lib.types.enum (builtins.attrNames base24.themes)) (
-            lib.types.attrsOf lib.types.str
-          );
-          default = "birdland";
-          description = "Base24 theme name or attrset, as for the Home Manager module.";
-        };
-
-        font = {
-          family = lib.mkOption {
-            type = lib.types.str;
-            default = "Inter";
-            description = "Font family for the greeter.";
-          };
-          package = lib.mkOption {
-            type = lib.types.nullOr lib.types.package;
-            default = pkgs.inter;
-            description = "Package providing the font.";
-          };
-        };
+        fill = shared.fill { };
+        theme = { inherit (shared.theme) scheme; };
+        font = shared.font pkgs;
       };
 
       config = lib.mkIf cfg.enable {

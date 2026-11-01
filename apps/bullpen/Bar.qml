@@ -2,17 +2,15 @@
 import QtQuick
 import Quickshell
 import modules.theme
+import modules.util
 
 PanelWindow {
     id: bar
 
     // Screen edge the bar is attached to: top, bottom, left or right.
     // Set with the BULLPEN_POSITION environment variable (default: top).
-    readonly property string edge: {
-        const value = String(Quickshell.env("BULLPEN_POSITION") ?? "top").toLowerCase();
-        return ["top", "bottom", "left", "right"].includes(value) ? value : "top";
-    }
-    readonly property bool vertical: edge === "left" || edge === "right"
+    readonly property string edge: Env.edge("BULLPEN_POSITION", "top")
+    readonly property bool vertical: Edges.vertical(edge)
 
     // One line of text on top/bottom bars; room for the stacked clock on the sides.
     readonly property int thickness: vertical ? 48 : 30
@@ -21,20 +19,15 @@ PanelWindow {
     // `modules`, set with BULLPEN_LEFT, BULLPEN_CENTER and BULLPEN_RIGHT. On
     // side bars, left is the top and right the bottom. An empty value leaves
     // that part empty; unset uses the default.
-    function sectionModules(variable, fallback) {
-        const value = Quickshell.env(variable);
-        const list = value === null || value === undefined ? fallback : String(value);
-        return list.split(",").map(s => s.trim()).filter(s => s !== "");
-    }
-    readonly property var leftModules: sectionModules("BULLPEN_LEFT", "workspaces")
-    readonly property var centerModules: sectionModules("BULLPEN_CENTER", "title")
-    readonly property var rightModules: sectionModules("BULLPEN_RIGHT", "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,clock")
+    readonly property var leftModules: Env.list("BULLPEN_LEFT", "workspaces")
+    readonly property var centerModules: Env.list("BULLPEN_CENTER", "title")
+    readonly property var rightModules: Env.list("BULLPEN_RIGHT", "cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,clock")
     readonly property var allModules: leftModules.concat(centerModules, rightModules)
 
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
-    readonly property bool imperial: String(Quickshell.env("BULLPEN_UNITS") ?? "").toLowerCase() === "imperial"
+    readonly property bool imperial: Env.get("BULLPEN_UNITS").toLowerCase() === "imperial"
     // "latitude,longitude" for the weather; it stays hidden without one.
-    readonly property string weatherLocation: String(Quickshell.env("BULLPEN_WEATHER_LOCATION") ?? "")
+    readonly property string weatherLocation: Env.get("BULLPEN_WEATHER_LOCATION")
 
     readonly property var modules: ({
             workspaces: workspacesModule,
@@ -76,10 +69,10 @@ PanelWindow {
         border.width: 1
 
         // Round the two corners on the side facing the screen.
-        topLeftRadius: bar.edge === "bottom" || bar.edge === "right" ? Theme.radiusXLarge : 0
-        topRightRadius: bar.edge === "bottom" || bar.edge === "left" ? Theme.radiusXLarge : 0
-        bottomLeftRadius: bar.edge === "top" || bar.edge === "right" ? Theme.radiusXLarge : 0
-        bottomRightRadius: bar.edge === "top" || bar.edge === "left" ? Theme.radiusXLarge : 0
+        topLeftRadius: Edges.corner(bar.edge, "topLeft", Theme.radiusXLarge)
+        topRightRadius: Edges.corner(bar.edge, "topRight", Theme.radiusXLarge)
+        bottomLeftRadius: Edges.corner(bar.edge, "bottomLeft", Theme.radiusXLarge)
+        bottomRightRadius: Edges.corner(bar.edge, "bottomRight", Theme.radiusXLarge)
 
         // left (top on side bars)
         Item {

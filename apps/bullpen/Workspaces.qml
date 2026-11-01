@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
 import modules.theme
+import modules.util
 
 Rectangle {
     id: root
@@ -8,7 +9,7 @@ Rectangle {
     // Screen edge the bar sits on. The pill is rounded on the side facing
     // the screen, and runs vertically on left/right bars.
     property string edge: "top"
-    readonly property bool vertical: edge === "left" || edge === "right"
+    readonly property bool vertical: Edges.vertical(edge)
     // Sits flush against the screen edge, wherever it is in the bar.
     readonly property bool hugsEdge: true
 
@@ -22,10 +23,10 @@ Rectangle {
     implicitWidth: vertical ? thickness : length
     implicitHeight: vertical ? length : thickness
 
-    topLeftRadius: edge === "bottom" || edge === "right" ? Theme.radiusMedium : 0
-    topRightRadius: edge === "bottom" || edge === "left" ? Theme.radiusMedium : 0
-    bottomLeftRadius: edge === "top" || edge === "right" ? Theme.radiusMedium : 0
-    bottomRightRadius: edge === "top" || edge === "left" ? Theme.radiusMedium : 0
+    topLeftRadius: Edges.corner(edge, "topLeft", Theme.radiusMedium)
+    topRightRadius: Edges.corner(edge, "topRight", Theme.radiusMedium)
+    bottomLeftRadius: Edges.corner(edge, "bottomLeft", Theme.radiusMedium)
+    bottomRightRadius: Edges.corner(edge, "bottomRight", Theme.radiusMedium)
 
     Flow {
         flow: root.vertical ? Flow.TopToBottom : Flow.LeftToRight

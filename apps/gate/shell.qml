@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Greetd
 import modules.theme
+import modules.util
 
 // Gate: the greeter. Runs under greetd inside cage (one window, so one
 // monitor), logs a user in and starts their chosen Wayland session.
@@ -19,28 +20,13 @@ import modules.theme
 ShellRoot {
     id: root
 
-    function env(name) {
-        const value = Quickshell.env(name);
-        return value === null || value === undefined ? "" : String(value);
+    JsonSettings {
+        id: settings
+
+        variable: "GATE_CONFIG"
     }
 
-    FileView {
-        id: configFile
-
-        path: root.env("GATE_CONFIG")
-        blockLoading: true
-    }
-
-    readonly property var config: {
-        if (configFile.path === "")
-            return {};
-        try {
-            return JSON.parse(configFile.text());
-        } catch (e) {
-            console.warn("gate: could not read", configFile.path, e);
-            return {};
-        }
-    }
+    readonly property var config: settings.values
 
     readonly property var users: config.users ?? []
     readonly property bool power: config.power ?? true

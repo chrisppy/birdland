@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Services.Pam
 import Quickshell.Wayland
 import modules.theme
+import modules.util
 
 // Tarp: the lock screen. It runs in the background and locks every monitor
 // with `birdland-tarp ipc call tarp lock`; the user's password, checked by
@@ -24,37 +25,18 @@ import modules.theme
 ShellRoot {
     id: root
 
-    function env(name) {
-        const value = Quickshell.env(name);
-        return value === null || value === undefined ? "" : String(value);
+    JsonSettings {
+        id: settings
+
+        variable: "TARP_CONFIG"
     }
 
-    function expandHome(path) {
-        return path.startsWith("~/") ? env("HOME") + path.slice(1) : path;
-    }
+    readonly property var config: settings.values
 
-    FileView {
-        id: configFile
-
-        path: root.env("TARP_CONFIG")
-        blockLoading: true
-    }
-
-    readonly property var config: {
-        if (configFile.path === "")
-            return {};
-        try {
-            return JSON.parse(configFile.text());
-        } catch (e) {
-            console.warn("tarp: could not read", configFile.path, e);
-            return {};
-        }
-    }
-
-    readonly property string pamService: config.pamService ?? (env("TARP_PAM_SERVICE") || "login")
-    readonly property string wallpaper: expandHome(String(config.wallpaper ?? env("TARP_WALLPAPER")))
+    readonly property string pamService: config.pamService ?? Env.get("TARP_PAM_SERVICE", "login")
+    readonly property string wallpaper: Env.expandHome(String(config.wallpaper ?? Env.get("TARP_WALLPAPER")))
     readonly property string fill: String(config.fill ?? "fill")
-    readonly property string userName: env("USER")
+    readonly property string userName: Env.get("USER")
 
     // Authentication state, shown on every monitor.
     property string prompt: "Password"
@@ -147,7 +129,7 @@ ShellRoot {
     FileView {
         id: stateFile
 
-        path: root.env("XDG_RUNTIME_DIR") === "" ? "" : root.env("XDG_RUNTIME_DIR") + "/birdland-tarp.state"
+        path: Env.get("XDG_RUNTIME_DIR") === "" ? "" : Env.get("XDG_RUNTIME_DIR") + "/birdland-tarp.state"
         blockLoading: true
         blockWrites: true
         printErrors: false

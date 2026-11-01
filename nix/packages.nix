@@ -70,9 +70,7 @@
         ":"
         "${pkgs.qt6.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}"
       ];
-    in
-    {
-      packages = rec {
+      apps = rec {
         bullpen = mkApp {
           name = "bullpen";
         };
@@ -110,5 +108,17 @@
 
         default = birdland;
       };
+    in
+    {
+      packages = apps;
+
+      # `nix flake check` only evaluates packages; building each app here
+      # makes CI catch a broken install phase or a missing file.
+      checks = lib.mapAttrs' (name: lib.nameValuePair "app-${name}") (
+        removeAttrs apps [
+          "birdland"
+          "default"
+        ]
+      );
     };
 }

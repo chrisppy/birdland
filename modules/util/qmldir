@@ -1,0 +1,3 @@
+singleton Edges 1.0 Edges.qml
+singleton Env 1.0 Env.qml
+JsonSettings 1.0 JsonSettings.qml

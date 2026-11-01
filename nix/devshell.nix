@@ -17,6 +17,13 @@
           niri
         ];
 
+        # What the packages add: the icon font, and WebP/TIFF support for
+        # wallpapers. The font config keeps the system's fonts too.
+        FONTCONFIG_FILE = pkgs.makeFontsConf {
+          fontDirectories = [ pkgs.nerd-fonts.symbols-only ];
+        };
+        QT_PLUGIN_PATH = "${pkgs.qt6.qtimageformats}/${pkgs.qt6.qtbase.qtPluginPrefix}";
+
         # Make the apps runnable straight from the checkout, e.g.
         # `qs -p apps/bullpen`: generate the theme file the packages normally
         # provide (it is gitignored) and put the repo root on the import path

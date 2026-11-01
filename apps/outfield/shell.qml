@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import modules.theme
+import modules.util
 import modules.wallpaper
 
 // Outfield: wallpapers. One background-layer window per monitor, showing an
@@ -23,38 +24,19 @@ import modules.wallpaper
 ShellRoot {
     id: root
 
-    function env(name) {
-        const value = Quickshell.env(name);
-        return value === null || value === undefined ? "" : String(value);
+    JsonSettings {
+        id: settings
+
+        variable: "OUTFIELD_CONFIG"
     }
 
-    function expandHome(path) {
-        return path.startsWith("~/") ? env("HOME") + path.slice(1) : path;
-    }
+    readonly property var config: settings.values
 
-    FileView {
-        id: configFile
-
-        path: root.env("OUTFIELD_CONFIG")
-        blockLoading: true
-    }
-
-    readonly property var config: {
-        if (configFile.path === "")
-            return {};
-        try {
-            return JSON.parse(configFile.text());
-        } catch (e) {
-            console.warn("outfield: could not read", configFile.path, e);
-            return {};
-        }
-    }
-
-    readonly property string wallpaper: expandHome(String(config.wallpaper ?? env("OUTFIELD_WALLPAPER")))
+    readonly property string wallpaper: Env.expandHome(String(config.wallpaper ?? Env.get("OUTFIELD_WALLPAPER")))
     readonly property var outputs: config.outputs ?? {}
-    readonly property int interval: config.interval ?? (env("OUTFIELD_INTERVAL") === "" ? 30 : Number(env("OUTFIELD_INTERVAL")))
-    readonly property bool shuffle: config.shuffle ?? env("OUTFIELD_SHUFFLE").toLowerCase() !== "false"
-    readonly property string fill: String(config.fill ?? (env("OUTFIELD_FILL") || "fill")).toLowerCase()
+    readonly property int interval: config.interval ?? Number(Env.get("OUTFIELD_INTERVAL", "30"))
+    readonly property bool shuffle: config.shuffle ?? Env.get("OUTFIELD_SHUFFLE").toLowerCase() !== "false"
+    readonly property string fill: String(config.fill ?? Env.get("OUTFIELD_FILL", "fill")).toLowerCase()
 
     // The wallpaper windows, one per monitor, as a plain array.
     function windows() {
@@ -63,7 +45,7 @@ ShellRoot {
 
     // The configured image or folder for a monitor.
     function sourceFor(output) {
-        return outputs[output] !== undefined ? expandHome(String(outputs[output])) : wallpaper;
+        return outputs[output] !== undefined ? Env.expandHome(String(outputs[output])) : wallpaper;
     }
 
     Variants {
@@ -115,14 +97,14 @@ ShellRoot {
         // Show an image or folder on every monitor until `reload`.
         function set(path: string): void {
             for (const window of root.windows())
-                window.wallpaper.source = root.expandHome(path);
+                window.wallpaper.source = Env.expandHome(path);
         }
 
         // Show an image or folder on one monitor (e.g. "DP-1") until `reload`.
         function setOutput(output: string, path: string): void {
             const window = root.windows().find(w => w.modelData.name === output);
             if (window)
-                window.wallpaper.source = root.expandHome(path);
+                window.wallpaper.source = Env.expandHome(path);
             else
                 console.warn("outfield: no monitor named", output);
         }

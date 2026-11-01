@@ -7,6 +7,7 @@
     base24-themes = {
       url = "github:chrisppy/base24-themes";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.devfmt.follows = "devfmt";
     };
     devfmt = {
       url = "github:chrisppy/devfmt";
@@ -22,6 +23,9 @@
       url = "github:imiric/qml-niri/main";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.quickshell.follows = "quickshell";
+      # Share devfmt's copies instead of locking a second set.
+      inputs.flake-parts.follows = "devfmt/flake-parts";
+      inputs.treefmt-nix.follows = "devfmt/treefmt-nix";
     };
   };
 

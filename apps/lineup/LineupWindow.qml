@@ -3,21 +3,19 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import modules.theme
+import modules.util
 
 PanelWindow {
     id: root
 
     // Screen edge the dock is attached to: top, bottom, left or right.
     // Set with the LINEUP_POSITION environment variable (default: bottom).
-    readonly property string edge: {
-        const value = String(Quickshell.env("LINEUP_POSITION") ?? "bottom").toLowerCase();
-        return ["top", "bottom", "left", "right"].includes(value) ? value : "bottom";
-    }
-    readonly property bool vertical: edge === "left" || edge === "right"
+    readonly property string edge: Env.edge("LINEUP_POSITION", "bottom")
+    readonly property bool vertical: Edges.vertical(edge)
 
     // Favorite desktop entry IDs, comma separated, in display order.
     // Set with the LINEUP_FAVORITES environment variable.
-    readonly property var favorites: String(Quickshell.env("LINEUP_FAVORITES") ?? "").split(",").map(s => s.trim()).filter(s => s.length > 0)
+    readonly property var favorites: Env.list("LINEUP_FAVORITES")
 
     // The desktop entries for the favorites. IDs that match no installed app
     // are skipped.
@@ -25,7 +23,14 @@ PanelWindow {
         // Reading the app list makes this re-run once entries finish loading.
         if (DesktopEntries.applications.values.length === 0)
             return [];
-        return favorites.map(id => DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id)).filter(e => !!e);
+        const entries = [];
+        for (const id of favorites) {
+            const entry = DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id);
+            // Two favorites can name the same app ("firefox", "org.mozilla.firefox").
+            if (entry && !entries.some(e => e.id === entry.id))
+                entries.push(entry);
+        }
+        return entries;
     }
 
     // Running apps that aren't favorites, one per app. A window whose app has
@@ -107,7 +112,12 @@ PanelWindow {
             spacing: Theme.spacingSmall
 
             Repeater {
-                model: root.favoriteEntries
+                // Keeps existing icons when the list changes, instead of
+                // recreating them all; entries match by desktop entry id.
+                model: ScriptModel {
+                    values: root.favoriteEntries
+                    objectProp: "id"
+                }
 
                 LineupItem {
                     required property var modelData
@@ -133,7 +143,12 @@ PanelWindow {
             }
 
             Repeater {
-                model: root.runningEntries
+                // Keeps existing icons when the list changes, instead of
+                // recreating them all; entries match by desktop entry id.
+                model: ScriptModel {
+                    values: root.runningEntries
+                    objectProp: "id"
+                }
 
                 LineupItem {
                     required property var modelData

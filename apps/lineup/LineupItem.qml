@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Wayland
 import modules.theme
+import modules.util
 
 Item {
     id: root
@@ -12,7 +13,7 @@ Item {
     // Decides if a window's app ID belongs to an entry: (entry, appId) => bool.
     required property var matcher
     property string edge: "bottom"
-    readonly property bool vertical: edge === "left" || edge === "right"
+    readonly property bool vertical: Edges.vertical(edge)
 
     // Open windows that belong to this app.
     readonly property var windows: ToplevelManager.toplevels.values.filter(t => matcher(entry, t.appId))

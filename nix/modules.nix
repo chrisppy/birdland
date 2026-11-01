@@ -14,8 +14,8 @@
         birdlandPkgs = self.packages.${system};
 
         base24 = inputs.base24-themes.lib.base24;
-        theme =
-          if builtins.isString cfg.theme.scheme then base24.themes.${cfg.theme.scheme} else cfg.theme.scheme;
+        shared = import ./_options.nix { inherit lib base24; };
+        theme = shared.resolveTheme cfg.theme.scheme;
 
         # The theme and font are baked into each app at build time.
         appPackage =
@@ -49,16 +49,7 @@
           bullpen = {
             description = "Bullpen Status Bar for Niri";
             extraOptions = {
-              position = lib.mkOption {
-                type = lib.types.enum [
-                  "top"
-                  "bottom"
-                  "left"
-                  "right"
-                ];
-                default = "top";
-                description = "Screen edge the Bullpen bar is attached to.";
-              };
+              position = shared.edge "top" "Screen edge the Bullpen bar is attached to.";
               layout = {
                 left = lib.mkOption {
                   type = lib.types.listOf bullpenModule;
@@ -146,16 +137,7 @@
                 ];
                 description = "Desktop entry IDs of the apps to show, in order.";
               };
-              position = lib.mkOption {
-                type = lib.types.enum [
-                  "top"
-                  "bottom"
-                  "left"
-                  "right"
-                ];
-                default = "bottom";
-                description = "Screen edge the Lineup dock is attached to.";
-              };
+              position = shared.edge "bottom" "Screen edge the Lineup dock is attached to.";
             };
             sessionVariables = {
               LINEUP_POSITION = cfg.lineup.position;
@@ -193,17 +175,7 @@
                 default = true;
                 description = "Pick images from a folder at random instead of in file-name order.";
               };
-              fill = lib.mkOption {
-                type = lib.types.enum [
-                  "fill"
-                  "fit"
-                  "stretch"
-                  "center"
-                  "tile"
-                ];
-                default = "fill";
-                description = "How images fit the screen: fill crops to cover it, fit shows all of the image.";
-              };
+              fill = shared.fill { };
             };
             # One JSON file rather than variables: paths and the per-monitor map
             # can hold spaces and quotes, which systemd's Environment= would mangle.
@@ -248,17 +220,9 @@
                 default = null;
                 description = "Image or folder behind the lock screen; null uses outfield's wallpaper, if any.";
               };
-              fill = lib.mkOption {
-                type = lib.types.enum [
-                  "fill"
-                  "fit"
-                  "stretch"
-                  "center"
-                  "tile"
-                ];
+              fill = shared.fill {
                 default = cfg.outfield.fill;
                 defaultText = lib.literalExpression "config.programs.birdland.outfield.fill";
-                description = "How the wallpaper fits the screen.";
               };
             };
             # A lock screen that stays down leaves the session locked with no way
@@ -304,31 +268,8 @@
           enable = lib.mkEnableOption "Birdland Quickshell Suite";
           systemd.enable = lib.mkEnableOption "systemd user services for Birdland apps";
 
-          theme = {
-            scheme = lib.mkOption {
-              type = lib.types.either (lib.types.enum (builtins.attrNames base24.themes)) (
-                lib.types.attrsOf lib.types.str
-              );
-              default = "birdland";
-              description = ''
-                Name of a theme bundled with base24-themes, or a custom Base16/Base24
-                theme: an attrset of base00–base17 as six hex digits without "#".
-              '';
-            };
-          };
-
-          font = {
-            family = lib.mkOption {
-              type = lib.types.str;
-              default = "Inter";
-              description = "Default font family for Birdland apps.";
-            };
-            package = lib.mkOption {
-              type = lib.types.nullOr lib.types.package;
-              default = pkgs.inter;
-              description = "Nix package for the font.";
-            };
-          };
+          theme = { inherit (shared.theme) scheme; };
+          font = shared.font pkgs;
         }
         // lib.mapAttrs (
           _: app:
@@ -378,12 +319,18 @@
                   Description = app.description;
                   PartOf = [ "graphical-session.target" ];
                   After = [ "graphical-session.target" ];
+                  # Wayland apps; skip them outside a Wayland session.
+                  ConditionEnvironment = "WAYLAND_DISPLAY";
                 }
                 // app.unit or { };
                 Service = {
                   ExecStart = lib.getExe (appPackage name);
                   Environment = lib.mapAttrsToList (var: value: "${var}=${value}") app.sessionVariables;
                   Restart = "always";
+                  # systemd gives up after 5 starts in 10 s. Waiting 3 s between
+                  # tries stays under that, so an app that starts before the
+                  # compositor is ready keeps retrying instead of staying down.
+                  RestartSec = 3;
                 }
                 // app.service or { };
                 Install.WantedBy = [ "graphical-session.target" ];

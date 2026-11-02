@@ -209,8 +209,8 @@ pill stays flush against the screen edge wherever it is placed.
 | `tray` | Tray icons; click activates, right click opens the menu | Apps with StatusNotifierItem icons |
 
 Modules with nothing to show (no battery, no GPU sensor, no weather location, no
-media player, no tray icons) hide themselves. Icons come from the Symbols Nerd Font, which the Home Manager
-module installs.
+media player, no tray icons) hide themselves. Icons come from the Symbols Nerd
+Font, which the Home Manager module installs.
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
 then Intel, then NVIDIA. Intel usage is the share of time the render engine is
@@ -225,10 +225,10 @@ Intel GPU, so Intel + NVIDIA laptops leave the NVIDIA GPU asleep. On a machine
 whose only readable GPU is a discrete one that sleeps, leave `gpu` out of the
 layout to save power.
 
-The clock uses Qt's date format: the default `hh:mm dd MMM, yyyy` shows
-"17:24 01 Nov, 2026", and `h:mm AP  ddd MMM d` shows "5:24 PM  Sun Nov 1". A
-format with seconds (`ss`) updates every second. The tray hides icons their apps
-mark as idle ("passive"), as Waybar does.
+The clock uses Qt's date format: the default `hh:mm dd MMM, yyyy` shows "17:24
+01 Nov, 2026", and `h:mm AP  ddd MMM d` shows "5:24 PM Sun Nov 1". A format with
+seconds (`ss`) updates every second. The tray hides icons their apps mark as
+idle ("passive"), as Waybar does.
 
 The weather request sends only the configured coordinates to
 [Open-Meteo](https://open-meteo.com), every 15 minutes (a minute after a failed
@@ -272,9 +272,9 @@ ______________________________________________________________________
 
 Pressbox is the session's notification server, so it replaces mako, dunst or
 swaync; run only one of them. Popups appear in a corner of the focused monitor,
-newest first, below the bar. Click one for the app's default action (or to
-close it), use its buttons for the others, or the cross to dismiss it. A popup
-stays while the pointer is over it, and critical ones (a low battery) stay until
+newest first, below the bar. Click one for the app's default action (or to close
+it), use its buttons for the others, or the cross to dismiss it. A popup stays
+while the pointer is over it, and critical ones (a low battery) stay until
 dismissed. There is no history: notifications are gone once closed.
 
 Do not disturb drops all but critical notifications:

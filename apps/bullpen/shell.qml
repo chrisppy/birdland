@@ -29,6 +29,7 @@ ShellRoot {
             screen: modelData
             stats: sharedStats
             weather: sharedWeather
+            feeds: sharedFeeds
         }
     }
 
@@ -51,5 +52,15 @@ ShellRoot {
         location: Env.get("BULLPEN_WEATHER_LOCATION")
         imperial: Env.get("BULLPEN_UNITS").toLowerCase() === "imperial"
         running: sharedStats.barList.some(bar => bar.usesWeather)
+    }
+
+    // One pressbox poll for all bars, while any of them shows the feeds.
+    FeedsData {
+        id: sharedFeeds
+
+        running: sharedStats.barList.some(bar => bar.usesFeeds)
+        interval: Math.max(30, Number(Env.get("BULLPEN_FEEDS_INTERVAL", "120")) || 120)
+        notifications: Env.get("BULLPEN_FEEDS_NOTIFICATIONS", "true") !== "false"
+        openCommand: Env.get("BULLPEN_FEEDS_COMMAND", "xdg-terminal-exec pressbox")
     }
 }

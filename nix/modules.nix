@@ -40,6 +40,7 @@
           "battery"
           "tray"
           "media"
+          "feeds"
         ];
 
         # A wallpaper image or folder: a Nix path (copied into the store) or a
@@ -129,6 +130,27 @@
                   description = "Longitude for the weather indicator.";
                 };
               };
+              feeds = {
+                command = lib.mkOption {
+                  type = lib.types.str;
+                  default = "xdg-terminal-exec pressbox";
+                  example = "foot pressbox";
+                  description = ''
+                    Shell command run by clicking the feeds indicator. The default
+                    opens pressbox in your default terminal.
+                  '';
+                };
+                interval = lib.mkOption {
+                  type = lib.types.ints.between 30 3600;
+                  default = 120;
+                  description = "Seconds between unread-count checks.";
+                };
+                notifications = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                  description = "Send a notification when new feed items arrive.";
+                };
+              };
             };
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
@@ -137,6 +159,9 @@
               BULLPEN_RIGHT = lib.concatStringsSep "," cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
               BULLPEN_CLOCK_FORMAT = cfg.bullpen.clock.format;
+              BULLPEN_FEEDS_COMMAND = cfg.bullpen.feeds.command;
+              BULLPEN_FEEDS_INTERVAL = toString cfg.bullpen.feeds.interval;
+              BULLPEN_FEEDS_NOTIFICATIONS = lib.boolToString cfg.bullpen.feeds.notifications;
               # Line breaks as "\n", which the bar reads as line breaks.
               BULLPEN_CLOCK_VERTICAL_FORMAT =
                 lib.replaceStrings [ "\n" ] [ "\\n" ]
@@ -411,7 +436,13 @@
               # Icon glyphs: bullpen's indicators, and tarp's and the shared
               # controls' buttons.
               ++ [ pkgs.nerd-fonts.symbols-only ]
-              ++ (lib.optional (cfg.font.package != null) cfg.font.package);
+              ++ (lib.optional (cfg.font.package != null) cfg.font.package)
+              # The feeds indicator's default click opens the default terminal.
+              ++ (lib.optional (
+                cfg.bullpen.enable
+                && lib.elem "feeds" (with cfg.bullpen.layout; left ++ center ++ right)
+                && lib.hasPrefix "xdg-terminal-exec " cfg.bullpen.feeds.command
+              ) pkgs.xdg-terminal-exec);
 
             sessionVariables = lib.foldl' (acc: app: acc // app.sessionVariables) { } (
               lib.attrValues enabledApps

@@ -73,6 +73,13 @@
       apps = rec {
         bullpen = mkApp {
           name = "bullpen";
+          # notify-send, for the feeds indicator's new-item notifications.
+          wrapperArgs = [
+            "--suffix"
+            "PATH"
+            ":"
+            "${pkgs.libnotify}/bin"
+          ];
         };
         dugout = mkApp {
           name = "dugout";

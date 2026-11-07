@@ -156,6 +156,9 @@ ______________________________________________________________________
 | `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |
 | `programs.birdland.bullpen.weather.latitude` | number or null | `null` | Weather location; the weather is hidden until both are set. |
 | `programs.birdland.bullpen.weather.longitude` | number or null | `null` | Weather location. |
+| `programs.birdland.bullpen.feeds.command` | string | `"xdg-terminal-exec pressbox"` | Shell command run by clicking the `feeds` indicator. |
+| `programs.birdland.bullpen.feeds.interval` | integer | `120` | Seconds between unread-count checks. |
+| `programs.birdland.bullpen.feeds.notifications` | boolean | `true` | Notify when new feed items arrive. |
 | `programs.birdland.dugout.enable` | boolean | `false` | Enable the Dugout app launcher. |
 | `programs.birdland.lineup.enable` | boolean | `false` | Enable the Lineup favorite apps dock. |
 | `programs.birdland.lineup.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
@@ -207,10 +210,21 @@ pill stays flush against the screen edge wherever it is placed.
 | `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |
 | `media` | The playing track; click plays/pauses, right click next, middle click previous | A player with MPRIS (most do) |
 | `tray` | Tray icons; click activates, right click opens the menu | Apps with StatusNotifierItem icons |
+| `feeds` | Unread items; click opens the reader, right click refreshes the feeds | A paired [pressbox](https://github.com/chrisppy/pressbox) client |
 
 Modules with nothing to show (no battery, no GPU sensor, no weather location, no
-media player, no tray icons) hide themselves. Icons come from the Symbols Nerd
+media player, no tray icons, no paired pressbox) hide themselves. Icons come from the Symbols Nerd
 Font, which the Home Manager module installs.
+
+The `feeds` indicator shows unread items on a
+[pressbox](https://github.com/chrisppy/pressbox) server. It reads the server
+and token from pressbox's own client files, `~/.config/pressbox/client.json`
+(written by pressbox's Home Manager module) and the token saved by
+`pressbox pair`, so there is nothing to set up in Birdland beyond adding
+`"feeds"` to a layout. It stays hidden until the machine is paired, shows a dim
+icon when everything is read, and a red `!` when the server can't be reached
+or rejects the token. With `feeds.notifications`, new items also send a
+notification (shown by Scoreboard, if you use it).
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
 then Intel, then NVIDIA. Intel usage is the share of time the render engine is
@@ -474,6 +488,7 @@ qs -p apps/bullpen                     # run an app
 BULLPEN_POSITION=left qs -p apps/bullpen
 BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu,volume qs -p apps/bullpen
 BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
+BULLPEN_RIGHT=feeds,clock qs -p apps/bullpen   # needs a paired pressbox
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup
 OUTFIELD_WALLPAPER=~/Pictures/Wallpapers OUTFIELD_INTERVAL=1 qs -p apps/outfield
 qs -p apps/tarp &  qs -p apps/tarp ipc call tarp lock   # your password unlocks it

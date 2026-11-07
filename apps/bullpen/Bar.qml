@@ -41,7 +41,8 @@ PanelWindow {
             microphone: microphoneModule,
             battery: batteryModule,
             tray: trayModule,
-            media: mediaModule
+            media: mediaModule,
+            feeds: feedsModule
         })
 
     implicitWidth: vertical ? thickness : 0
@@ -173,6 +174,9 @@ PanelWindow {
     // The weather, also shared by every bar.
     required property WeatherData weather
     readonly property bool usesWeather: allModules.includes("weather")
+    // Unread feed items, also shared.
+    required property FeedsData feeds
+    readonly property bool usesFeeds: allModules.includes("feeds")
 
     Component {
         id: workspacesModule
@@ -289,6 +293,13 @@ PanelWindow {
     Component {
         id: mediaModule
         Media {
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: feedsModule
+        Feeds {
+            feeds: bar.feeds
             vertical: bar.vertical
         }
     }

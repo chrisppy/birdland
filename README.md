@@ -140,7 +140,7 @@ ______________________________________________________________________
 ## Configuration Options
 
 | Option | Type | Default | Description |
-| :----------------------------------------------- | :--------------------- | :--------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| :----------------------------------------------- | :--------------------- | :----------------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
 | `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |
@@ -213,17 +213,17 @@ pill stays flush against the screen edge wherever it is placed.
 | `feeds` | Unread items; click opens the reader, right click refreshes the feeds | A paired [pressbox](https://github.com/chrisppy/pressbox) client |
 
 Modules with nothing to show (no battery, no GPU sensor, no weather location, no
-media player, no tray icons, no paired pressbox) hide themselves. Icons come from the Symbols Nerd
-Font, which the Home Manager module installs.
+media player, no tray icons, no paired pressbox) hide themselves. Icons come
+from the Symbols Nerd Font, which the Home Manager module installs.
 
 The `feeds` indicator shows unread items on a
-[pressbox](https://github.com/chrisppy/pressbox) server. It reads the server
-and token from pressbox's own client files, `~/.config/pressbox/client.json`
+[pressbox](https://github.com/chrisppy/pressbox) server. It reads the server and
+token from pressbox's own client files, `~/.config/pressbox/client.json`
 (written by pressbox's Home Manager module) and the token saved by
 `pressbox pair`, so there is nothing to set up in Birdland beyond adding
 `"feeds"` to a layout. It stays hidden until the machine is paired, shows a dim
-icon when everything is read, and a red `!` when the server can't be reached
-or rejects the token. With `feeds.notifications`, new items also send a
+icon when everything is read, and a red `!` when the server can't be reached or
+rejects the token. With `feeds.notifications`, new items also send a
 notification (shown by Scoreboard, if you use it).
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),

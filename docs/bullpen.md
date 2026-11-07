@@ -10,7 +10,7 @@ to fit; outside the center it is capped at a quarter of the bar. The workspaces
 pill stays flush against the screen edge wherever it is placed.
 
 | Module | Shows | Needs |
-| :-------------- | :----------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| :-------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
 | `title` | Focused window title, on its monitor's bar (top/bottom bars only) | Niri |
 | `clock` | Time and date | Nothing |

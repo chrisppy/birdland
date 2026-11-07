@@ -80,7 +80,10 @@
             "--suffix"
             "PATH"
             ":"
-            "${lib.makeBinPath [ pkgs.libnotify pkgs.systemd ]}"
+            "${lib.makeBinPath [
+              pkgs.libnotify
+              pkgs.systemd
+            ]}"
           ];
         };
         dugout = mkApp {

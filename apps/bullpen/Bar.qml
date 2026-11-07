@@ -182,6 +182,7 @@ PanelWindow {
         id: workspacesModule
         Workspaces {
             edge: bar.edge
+            barThickness: bar.thickness
             output: bar.screen?.name ?? ""
         }
     }

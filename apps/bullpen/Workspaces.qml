@@ -18,7 +18,10 @@ Rectangle {
     // Shows up to maxDots dots; the pill fits the dots shown.
     readonly property int maxDots: 11
     readonly property int dotSize: 15
-    readonly property int thickness: 25
+    // Thickness of the bar it sits in. The pill fills it but for a small gap on
+    // the side away from the screen edge, so it matches top/bottom and side bars.
+    property int barThickness: 30
+    readonly property int thickness: barThickness - 5
     readonly property int length: (vertical ? dots.implicitHeight : dots.implicitWidth) + 2 * Theme.spacingMedium
 
     color: Theme.surfaceAlt

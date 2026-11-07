@@ -15,7 +15,7 @@
           qt6.qtdeclarative
           qt6.qtbase
           niri
-          # notify-send, for trying Pressbox
+          # notify-send, for trying Scoreboard
           libnotify
         ];
 

@@ -217,8 +217,8 @@
               )}";
             };
           };
-          pressbox = {
-            description = "Pressbox Notification Popups for Niri";
+          scoreboard = {
+            description = "Scoreboard Notification Popups for Niri";
             extraOptions = {
               position = lib.mkOption {
                 type = lib.types.enum [
@@ -237,8 +237,8 @@
               };
             };
             sessionVariables = {
-              PRESSBOX_POSITION = cfg.pressbox.position;
-              PRESSBOX_TIMEOUT = toString cfg.pressbox.timeout;
+              SCOREBOARD_POSITION = cfg.scoreboard.position;
+              SCOREBOARD_TIMEOUT = toString cfg.scoreboard.timeout;
             };
           };
           jumbotron = {
@@ -325,7 +325,7 @@
           "\"${escaped}\"";
         serviceEnvironment = lib.mapAttrsToList (var: value: systemdQuote "${var}=${value}");
 
-        # Another notification daemon would hold the D-Bus name pressbox needs.
+        # Another notification daemon would hold the D-Bus name scoreboard needs.
         otherNotifier = config.services.mako.enable || config.services.dunst.enable;
 
         enabledApps = lib.filterAttrs (name: _: cfg.${name}.enable) apps;
@@ -346,6 +346,21 @@
         '';
       in
       {
+        # Scoreboard was called Pressbox; the old option names still work.
+        imports =
+          map
+            (
+              option:
+              lib.mkRenamedOptionModule
+                [ "programs" "birdland" "pressbox" option ]
+                [ "programs" "birdland" "scoreboard" option ]
+            )
+            [
+              "enable"
+              "position"
+              "timeout"
+            ];
+
         options.programs.birdland = {
           enable = lib.mkEnableOption "Birdland Quickshell Suite";
           systemd.enable = lib.mkEnableOption "systemd user services for Birdland apps";
@@ -367,8 +382,8 @@
               programs.birdland.tarp locks the screen only while it is running. Enable
               programs.birdland.systemd.enable, or start birdland-tarp with your session.
             ''
-            ++ lib.optional (cfg.pressbox.enable && otherNotifier) ''
-              programs.birdland.pressbox and services.mako or services.dunst are both
+            ++ lib.optional (cfg.scoreboard.enable && otherNotifier) ''
+              programs.birdland.scoreboard and services.mako or services.dunst are both
               notification servers, and only one can run; disable one of them.
             '';
 

@@ -8,24 +8,24 @@ import Niri
 import modules.theme
 import modules.util
 
-// Pressbox: notification popups. It is the session's notification server
+// Scoreboard: notification popups. It is the session's notification server
 // (org.freedesktop.Notifications), so stop other notification daemons such as
 // mako or dunst. Popups show in a corner of the focused monitor, newest first,
 // and close after a timeout; critical ones stay until dismissed.
 //
-//   variable          meaning
-//   PRESSBOX_POSITION top-right (default), top-left, bottom-right or bottom-left
-//   PRESSBOX_TIMEOUT  seconds a popup stays when the app doesn't say (default 5)
+//   variable            meaning
+//   SCOREBOARD_POSITION top-right (default), top-left, bottom-right or bottom-left
+//   SCOREBOARD_TIMEOUT  seconds a popup stays when the app doesn't say (default 5)
 //
-// IPC: birdland-pressbox ipc call pressbox <toggleDnd | setDnd BOOL | isDnd | dismissAll>
+// IPC: birdland-scoreboard ipc call scoreboard <toggleDnd | setDnd BOOL | isDnd | dismissAll>
 // Do not disturb drops all but critical notifications.
 ShellRoot {
     id: root
 
-    readonly property string position: ["top-right", "top-left", "bottom-right", "bottom-left"].includes(Env.get("PRESSBOX_POSITION")) ? Env.get("PRESSBOX_POSITION") : "top-right"
+    readonly property string position: ["top-right", "top-left", "bottom-right", "bottom-left"].includes(Env.get("SCOREBOARD_POSITION")) ? Env.get("SCOREBOARD_POSITION") : "top-right"
     readonly property bool atTop: position.startsWith("top")
     readonly property bool atLeft: position.endsWith("left")
-    readonly property int timeout: Math.max(1, Number(Env.get("PRESSBOX_TIMEOUT", "5")) || 5) * 1000
+    readonly property int timeout: Math.max(1, Number(Env.get("SCOREBOARD_TIMEOUT", "5")) || 5) * 1000
     readonly property int maxPopups: 5
 
     property bool dnd: false
@@ -83,7 +83,7 @@ ShellRoot {
             // Below bars rather than over them.
             exclusionMode: ExclusionMode.Normal
 
-            WlrLayershell.namespace: "birdland-pressbox"
+            WlrLayershell.namespace: "birdland-scoreboard"
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
@@ -111,7 +111,7 @@ ShellRoot {
     }
 
     IpcHandler {
-        target: "pressbox"
+        target: "scoreboard"
 
         // Do not disturb on or off; returns the new state.
         function toggleDnd(): bool {

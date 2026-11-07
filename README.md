@@ -20,7 +20,7 @@ individually or as a complete suite:
 - **`lineup`**: A dock of favorite and running apps on every monitor.
 - **`outfield`**: Wallpapers on every monitor: an image, or a folder that
   rotates, with optional per-monitor choices.
-- **`pressbox`**: Notification popups on the focused monitor.
+- **`scoreboard`**: Notification popups on the focused monitor.
 - **`jumbotron`**: A pop-up on the focused monitor when the volume, microphone
   mute or screen brightness changes.
 - **`tarp`**: A lock screen that locks on idle, before sleep and on
@@ -115,7 +115,7 @@ Import the Home Manager module provided by the flake and enable the suite:
       interval = 30;                       # minutes between images from a folder
     };
 
-    pressbox = {
+    scoreboard = {
       enable = true;
       position = "top-right";
       timeout = 5; # seconds
@@ -166,9 +166,9 @@ ______________________________________________________________________
 | `programs.birdland.outfield.interval` | integer | `30` | Minutes between images from a folder; `0` keeps the first. |
 | `programs.birdland.outfield.shuffle` | boolean | `true` | Random order instead of file-name order. |
 | `programs.birdland.outfield.fill` | enum | `"fill"` | `fill` (crop to cover), `fit`, `stretch`, `center` or `tile`. |
-| `programs.birdland.pressbox.enable` | boolean | `false` | Enable the Pressbox notification popups. |
-| `programs.birdland.pressbox.position` | enum | `"top-right"` | Corner: `top-right`, `top-left`, `bottom-right` or `bottom-left`. |
-| `programs.birdland.pressbox.timeout` | integer | `5` | Seconds a popup stays when the app doesn't say; critical ones stay. |
+| `programs.birdland.scoreboard.enable` | boolean | `false` | Enable the Scoreboard notification popups. |
+| `programs.birdland.scoreboard.position` | enum | `"top-right"` | Corner: `top-right`, `top-left`, `bottom-right` or `bottom-left`. |
+| `programs.birdland.scoreboard.timeout` | integer | `5` | Seconds a popup stays when the app doesn't say; critical ones stay. |
 | `programs.birdland.jumbotron.enable` | boolean | `false` | Enable the Jumbotron volume and brightness pop-ups. |
 | `programs.birdland.jumbotron.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.tarp.enable` | boolean | `false` | Enable the Tarp lock screen. Needs `systemd.enable`, or start it yourself. |
@@ -268,9 +268,12 @@ layer-rule {
 
 ______________________________________________________________________
 
-## Pressbox notifications
+## Scoreboard notifications
 
-Pressbox is the session's notification server, so it replaces mako, dunst or
+Scoreboard used to be called Pressbox. `programs.birdland.pressbox.*` still
+works, with a warning to rename it to `programs.birdland.scoreboard.*`.
+
+Scoreboard is the session's notification server, so it replaces mako, dunst or
 swaync; run only one of them. Popups appear in a corner of the focused monitor,
 newest first, below the bar. Click one for the app's default action (or to close
 it), use its buttons for the others, or the cross to dismiss it. A popup stays
@@ -280,9 +283,9 @@ dismissed. There is no history: notifications are gone once closed.
 Do not disturb drops all but critical notifications:
 
 ```sh
-birdland-pressbox ipc call pressbox toggleDnd    # prints the new state
-birdland-pressbox ipc call pressbox setDnd true
-birdland-pressbox ipc call pressbox dismissAll
+birdland-scoreboard ipc call scoreboard toggleDnd    # prints the new state
+birdland-scoreboard ipc call scoreboard setDnd true
+birdland-scoreboard ipc call scoreboard dismissAll
 ```
 
 ______________________________________________________________________

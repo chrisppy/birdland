@@ -60,9 +60,9 @@ check:
 fmt:
     nix fmt
 
-# Check formatting without modifying files
+# Check formatting without modifying files (the flake's treefmt check, run on a copy)
 fmt-check:
-    nix fmt -- --check
+    nix build --no-link ".#checks.$(nix eval --impure --raw --expr builtins.currentSystem).treefmt"
 
 # Update all flake inputs
 update:

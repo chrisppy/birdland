@@ -18,7 +18,7 @@ pill stays flush against the screen edge wherever it is placed.
 | `gpu` | Usage, and temperature when available | AMD, Intel (`i915`, `xe`): nothing (sysfs). NVIDIA: `nvidia-smi` |
 | `temperature` | CPU temperature | A hwmon sensor: `k10temp`, `zenpower`, `coretemp`... |
 | `weather` | Current conditions from Open-Meteo | Internet access and `weather.latitude`/`longitude` |
-| `network` | Wired, or Wi-Fi signal strength | NetworkManager |
+| `network` | Wired, or Wi-Fi signal strength | NetworkManager, or systemd-networkd (`networkctl`; no captive-portal check) |
 | `volume` | Default output; click mutes, scroll changes it | PipeWire with WirePlumber |
 | `microphone` | Default input; click mutes, scroll changes it | PipeWire with WirePlumber |
 | `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |

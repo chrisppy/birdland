@@ -73,12 +73,14 @@
       apps = rec {
         bullpen = mkApp {
           name = "bullpen";
-          # notify-send, for the feeds indicator's new-item notifications.
+          # notify-send, for the feeds indicator's new-item notifications, and
+          # networkctl, for the network indicator without NetworkManager. Suffixed
+          # so the system's own networkctl, matching its systemd, comes first.
           wrapperArgs = [
             "--suffix"
             "PATH"
             ":"
-            "${pkgs.libnotify}/bin"
+            "${lib.makeBinPath [ pkgs.libnotify pkgs.systemd ]}"
           ];
         };
         dugout = mkApp {

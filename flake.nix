@@ -6,8 +6,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     base24-themes = {
       url = "github:chrisppy/base24-themes";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.devfmt.follows = "devfmt";
+      inputs = {
+        devfmt.follows = "devfmt";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     devfmt = {
       url = "github:chrisppy/devfmt";
@@ -21,11 +23,13 @@
 
     qml-niri = {
       url = "github:imiric/qml-niri/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";
-      # Share devfmt's copies instead of locking a second set.
-      inputs.flake-parts.follows = "devfmt/flake-parts";
-      inputs.treefmt-nix.follows = "devfmt/treefmt-nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        quickshell.follows = "quickshell";
+        # Share devfmt's copies instead of locking a second set.
+        flake-parts.follows = "devfmt/flake-parts";
+        treefmt-nix.follows = "devfmt/treefmt-nix";
+      };
     };
   };
 

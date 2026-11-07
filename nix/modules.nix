@@ -67,16 +67,6 @@
                 right = lib.mkOption {
                   type = lib.types.listOf bullpenModule;
                   default = [
-                    "media"
-                    "cpu"
-                    "memory"
-                    "gpu"
-                    "temperature"
-                    "weather"
-                    "network"
-                    "volume"
-                    "microphone"
-                    "battery"
                     "tray"
                     "clock"
                   ];

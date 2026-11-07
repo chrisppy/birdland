@@ -16,7 +16,7 @@ through Nix Flakes and Home Manager. Designed with native support for the
 
 ## Components
 
-Birdland is split into six Quickshell applications, which can be used
+Birdland is split into eight Quickshell applications, which can be used
 individually or as a complete suite:
 
 - **[`bullpen`](./docs/bullpen.md)**: A status bar on every monitor, attachable

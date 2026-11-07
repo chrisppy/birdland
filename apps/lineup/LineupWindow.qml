@@ -11,7 +11,7 @@ PanelWindow {
     // Screen edge the dock is attached to: top, bottom, left or right.
     // Set with the LINEUP_POSITION environment variable (default: bottom).
     readonly property string edge: Env.edge("LINEUP_POSITION", "bottom")
-    readonly property bool vertical: Edges.vertical(edge)
+    readonly property bool vertical: ScreenEdges.vertical(edge)
 
     // Favorite desktop entry IDs, comma separated, in display order.
     // Set with the LINEUP_FAVORITES environment variable.

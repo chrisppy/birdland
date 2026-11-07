@@ -133,7 +133,7 @@ ShellRoot {
             Level {
                 id: osd
 
-                vertical: Edges.vertical(root.edge)
+                vertical: ScreenEdges.vertical(root.edge)
                 icon: {
                     if (root.kind === "brightness") {
                         const level = backlight.level;

@@ -10,7 +10,7 @@ PanelWindow {
     // Screen edge the bar is attached to: top, bottom, left or right.
     // Set with the BULLPEN_POSITION environment variable (default: top).
     readonly property string edge: Env.edge("BULLPEN_POSITION", "top")
-    readonly property bool vertical: Edges.vertical(edge)
+    readonly property bool vertical: ScreenEdges.vertical(edge)
 
     // One line of text on top/bottom bars; room for the stacked clock on the sides.
     readonly property int thickness: vertical ? 48 : 30
@@ -70,10 +70,10 @@ PanelWindow {
         border.width: 1
 
         // Round the two corners on the side facing the screen.
-        topLeftRadius: Edges.corner(bar.edge, "topLeft", Theme.radiusXLarge)
-        topRightRadius: Edges.corner(bar.edge, "topRight", Theme.radiusXLarge)
-        bottomLeftRadius: Edges.corner(bar.edge, "bottomLeft", Theme.radiusXLarge)
-        bottomRightRadius: Edges.corner(bar.edge, "bottomRight", Theme.radiusXLarge)
+        topLeftRadius: ScreenEdges.corner(bar.edge, "topLeft", Theme.radiusXLarge)
+        topRightRadius: ScreenEdges.corner(bar.edge, "topRight", Theme.radiusXLarge)
+        bottomLeftRadius: ScreenEdges.corner(bar.edge, "bottomLeft", Theme.radiusXLarge)
+        bottomRightRadius: ScreenEdges.corner(bar.edge, "bottomRight", Theme.radiusXLarge)
 
         // left (top on side bars)
         Item {

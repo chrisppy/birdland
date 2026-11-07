@@ -26,6 +26,6 @@ QtObject {
     // A screen edge: top, bottom, left or right, else `fallback`.
     function edge(name, fallback) {
         const value = get(name).toLowerCase();
-        return Edges.all.includes(value) ? value : fallback;
+        return ScreenEdges.all.includes(value) ? value : fallback;
     }
 }

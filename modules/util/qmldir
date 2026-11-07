@@ -1,5 +1,5 @@
 singleton Apps 1.0 Apps.qml
-singleton Edges 1.0 Edges.qml
+singleton ScreenEdges 1.0 ScreenEdges.qml
 singleton Env 1.0 Env.qml
 singleton Screens 1.0 Screens.qml
 JsonSettings 1.0 JsonSettings.qml

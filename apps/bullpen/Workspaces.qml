@@ -9,7 +9,7 @@ Rectangle {
     // Screen edge the bar sits on. The pill is rounded on the side facing
     // the screen, and runs vertically on left/right bars.
     property string edge: "top"
-    readonly property bool vertical: Edges.vertical(edge)
+    readonly property bool vertical: ScreenEdges.vertical(edge)
     // The monitor (Niri output name) whose workspaces to show; "" shows all.
     property string output: ""
     // Sits flush against the screen edge, wherever it is in the bar.
@@ -25,10 +25,10 @@ Rectangle {
     implicitWidth: vertical ? thickness : length
     implicitHeight: vertical ? length : thickness
 
-    topLeftRadius: Edges.corner(edge, "topLeft", Theme.radiusMedium)
-    topRightRadius: Edges.corner(edge, "topRight", Theme.radiusMedium)
-    bottomLeftRadius: Edges.corner(edge, "bottomLeft", Theme.radiusMedium)
-    bottomRightRadius: Edges.corner(edge, "bottomRight", Theme.radiusMedium)
+    topLeftRadius: ScreenEdges.corner(edge, "topLeft", Theme.radiusMedium)
+    topRightRadius: ScreenEdges.corner(edge, "topRight", Theme.radiusMedium)
+    bottomLeftRadius: ScreenEdges.corner(edge, "bottomLeft", Theme.radiusMedium)
+    bottomRightRadius: ScreenEdges.corner(edge, "bottomRight", Theme.radiusMedium)
 
     Flow {
         id: dots

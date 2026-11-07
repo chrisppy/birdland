@@ -13,7 +13,7 @@ Item {
     // Decides if a window's app ID belongs to an entry: (entry, appId) => bool.
     required property var matcher
     property string edge: "bottom"
-    readonly property bool vertical: Edges.vertical(edge)
+    readonly property bool vertical: ScreenEdges.vertical(edge)
 
     // Open windows that belong to this app.
     readonly property var windows: ToplevelManager.toplevels.values.filter(t => matcher(entry, t.appId))

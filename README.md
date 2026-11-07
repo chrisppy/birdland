@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/birdland-mark-light.svg">
+    <img src="docs/assets/birdland-mark.svg" alt="Birdland logo" width="160">
+  </picture>
+</p>
+
 # Birdland
 
 A modular, highly customizable desktop shell suite built with

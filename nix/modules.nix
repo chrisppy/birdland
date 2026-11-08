@@ -361,31 +361,6 @@
         '';
       in
       {
-        # Announcer was called Pressbox, then briefly Scoreboard (both
-        # 2026-11-07); the old option names still work, with a warning.
-        # Remove these aliases after 2027-02-07.
-        imports =
-          lib.concatMap
-            (
-              old:
-              map
-                (
-                  option:
-                  lib.mkRenamedOptionModule
-                    [ "programs" "birdland" old option ]
-                    [ "programs" "birdland" "announcer" option ]
-                )
-                [
-                  "enable"
-                  "position"
-                  "timeout"
-                ]
-            )
-            [
-              "pressbox"
-              "scoreboard"
-            ];
-
         options.programs.birdland = {
           enable = lib.mkEnableOption "Birdland Quickshell Suite";
           systemd.enable = lib.mkEnableOption "systemd user services for Birdland apps";

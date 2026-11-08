@@ -1,11 +1,5 @@
 ## Announcer notifications
 
-Announcer used to be called Pressbox, then Scoreboard.
-`programs.birdland.pressbox.*` and `programs.birdland.scoreboard.*` still work,
-with a warning to rename them to `programs.birdland.announcer.*`. The
-`SCOREBOARD_*` variables, the `birdland-scoreboard` command and the `scoreboard`
-IPC target are now `ANNOUNCER_*`, `birdland-announcer` and `announcer`.
-
 Announcer is the session's notification server, so it replaces mako, dunst or
 swaync; run only one of them. Popups appear in a corner of the focused monitor,
 newest first, below the bar. Click one for the app's default action (or to close

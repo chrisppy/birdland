@@ -44,5 +44,4 @@ Indicator {
             return wifiEnabled ? "\u{F092E}" : "\u{F05AA}"; // wifi_strength_off_outline / wifi_off
         return "\u{F0C9B}"; // network_off
     }
-
 }

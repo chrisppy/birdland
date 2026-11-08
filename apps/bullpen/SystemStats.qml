@@ -19,6 +19,7 @@ Scope {
 
     property bool running: true
     property bool sampleGpu: true
+    property bool sampleCpuTemp: true
     property int interval: 2000
 
     property real cpuUsage: -1
@@ -181,7 +182,7 @@ Scope {
 
     FileView {
         id: cpuTempFile
-        path: root.cpuTempPath
+        path: root.sampleCpuTemp ? root.cpuTempPath : ""
         onLoaded: root.cpuTemp = Number(text()) / 1000
     }
 

@@ -12,11 +12,19 @@ PanelWindow {
     signal closeRequested
 
     readonly property int maxRows: 8
-    readonly property var results: filter(DesktopEntries.applications.values, search.text)
+    // The visible apps with their search text lowercased, alphabetical. Built
+    // once each time Dugout opens (and when apps change), not per keystroke.
+    readonly property var catalog: DesktopEntries.applications.values.filter(a => !a.noDisplay).map(app => ({
+                app: app,
+                name: (app.name || "").toLowerCase(),
+                extra: [app.genericName || "", app.comment || "", (app.keywords || []).join(" ")].join(" ").toLowerCase()
+            })).sort((x, y) => x.app.name.localeCompare(y.app.name))
 
-    // Score an entry against a lowercase query. Higher is better, 0 = no match.
-    function score(app, q) {
-        const name = (app.name || "").toLowerCase();
+    readonly property var results: filter(catalog, search.text)
+
+    // Score a catalog entry against a lowercase query. Higher is better, 0 = no match.
+    function score(entry, q) {
+        const name = entry.name;
 
         if (name === q)
             return 1000;
@@ -39,21 +47,18 @@ PanelWindow {
         if (qi === q.length)
             return 300 - gaps;
 
-        const extra = [app.genericName || "", app.comment || "", (app.keywords || []).join(" ")].join(" ").toLowerCase();
-        return extra.indexOf(q) >= 0 ? 100 : 0;
+        return entry.extra.indexOf(q) >= 0 ? 100 : 0;
     }
 
-    // Visible apps matching `query`, best first. Empty query = alphabetical.
+    // Apps matching `query`, best first. Empty query = all, alphabetical.
     function filter(entries, query) {
         const q = (query || "").trim().toLowerCase();
-        const apps = entries.filter(a => !a.noDisplay);
-
         if (!q)
-            return apps.sort((a, b) => a.name.localeCompare(b.name));
+            return entries.map(e => e.app);
 
-        return apps.map(app => ({
-                    app: app,
-                    s: score(app, q)
+        return entries.map(entry => ({
+                    app: entry.app,
+                    s: score(entry, q)
                 })).filter(x => x.s > 0).sort((x, y) => y.s - x.s || x.app.name.localeCompare(y.app.name)).map(x => x.app);
     }
 

@@ -171,12 +171,16 @@ PanelWindow {
     required property SystemStats stats
     readonly property bool usesStats: ["cpu", "memory", "gpu", "temperature"].some(name => allModules.includes(name))
     readonly property bool usesGpu: allModules.includes("gpu")
+    readonly property bool usesTemperature: allModules.includes("temperature")
     // The weather, also shared by every bar.
     required property WeatherData weather
     readonly property bool usesWeather: allModules.includes("weather")
     // Unread feed items, also shared.
     required property FeedsData feeds
     readonly property bool usesFeeds: allModules.includes("feeds")
+    // systemd-networkd's links, also shared.
+    required property NetworkData networkd
+    readonly property bool usesNetwork: allModules.includes("network")
 
     Component {
         id: workspacesModule
@@ -262,6 +266,7 @@ PanelWindow {
     Component {
         id: networkModule
         Network {
+            networkd: bar.networkd
             vertical: bar.vertical
         }
     }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
 import Quickshell
+import Quickshell.Networking
 import Niri
 import modules.util
 
@@ -30,6 +31,7 @@ ShellRoot {
             stats: sharedStats
             weather: sharedWeather
             feeds: sharedFeeds
+            networkd: sharedNetworkd
         }
     }
 
@@ -41,6 +43,7 @@ ShellRoot {
 
         running: barList.some(bar => bar.usesStats)
         sampleGpu: barList.some(bar => bar.usesGpu)
+        sampleCpuTemp: barList.some(bar => bar.usesTemperature)
     }
 
     // One weather fetch for all bars, while any of them shows the weather.
@@ -62,5 +65,13 @@ ShellRoot {
         interval: Math.max(30, Number(Env.get("BULLPEN_FEEDS_INTERVAL", "120")) || 120)
         notifications: Env.get("BULLPEN_FEEDS_NOTIFICATIONS", "true") !== "false"
         openCommand: Env.get("BULLPEN_FEEDS_COMMAND", "xdg-terminal-exec pressbox")
+    }
+
+    // One networkctl poll for all bars, while any of them shows the network
+    // and NetworkManager isn't running (it reports changes by itself).
+    NetworkData {
+        id: sharedNetworkd
+
+        running: Networking.backend === NetworkBackendType.None && sharedStats.barList.some(bar => bar.usesNetwork)
     }
 }

@@ -361,7 +361,8 @@
         '';
       in
       {
-        # Scoreboard was called Pressbox; the old option names still work.
+        # Scoreboard was called Pressbox until 2026-11-07; the old option names
+        # still work, with a warning. Remove these aliases after 2027-02-07.
         imports =
           map
             (

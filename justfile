@@ -32,13 +32,13 @@ run-outfield:
 next-wallpaper:
     nix run .#outfield -- ipc call outfield next
 
-# Run the Scoreboard notification popups (stop other notification daemons first)
-run-scoreboard:
-    nix run .#scoreboard
+# Run the Announcer notification popups (stop other notification daemons first)
+run-announcer:
+    nix run .#announcer
 
-# Send a test notification to a running Scoreboard
+# Send a test notification to a running Announcer
 test-notification:
-    notify-send -a Birdland "Batter up" "Scoreboard is working"
+    notify-send -a Birdland "Batter up" "Announcer is working"
 
 # Run the Jumbotron volume and brightness pop-ups
 run-jumbotron:

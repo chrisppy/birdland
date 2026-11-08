@@ -35,7 +35,7 @@ individually or as a complete suite:
 - **`lineup`**: A dock of favorite and running apps on every monitor.
 - **[`outfield`](./docs/outfield.md)**: Wallpapers on every monitor: an image,
   or a folder that rotates, with optional per-monitor choices.
-- **[`scoreboard`](./docs/scoreboard.md)**: Notification popups on the focused
+- **[`announcer`](./docs/announcer.md)**: Notification popups on the focused
   monitor.
 - **[`jumbotron`](./docs/jumbotron.md)**: A pop-up on the focused monitor when
   the volume, microphone mute or screen brightness changes.

@@ -15,7 +15,7 @@
           qt6.qtdeclarative
           qt6.qtbase
           niri
-          # notify-send, for trying Scoreboard
+          # notify-send, for trying Announcer
           libnotify
         ];
 

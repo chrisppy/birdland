@@ -38,7 +38,7 @@ token from pressbox's own client files, `~/.config/pressbox/client.json`
 `"feeds"` to a layout. It stays hidden until the machine is paired, shows a dim
 icon when everything is read, and a red `!` when the server can't be reached or
 rejects the token. With `feeds.notifications`, new items also send a
-notification (shown by Scoreboard, if you use it).
+notification (shown by Announcer, if you use it).
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
 then Intel, then NVIDIA. Intel usage is the share of time the render engine is

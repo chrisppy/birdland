@@ -8,24 +8,24 @@ import Niri
 import modules.theme
 import modules.util
 
-// Scoreboard: notification popups. It is the session's notification server
+// Announcer: notification popups. It is the session's notification server
 // (org.freedesktop.Notifications), so stop other notification daemons such as
 // mako or dunst. Popups show in a corner of the focused monitor, newest first,
 // and close after a timeout; critical ones stay until dismissed.
 //
 //   variable            meaning
-//   SCOREBOARD_POSITION top-right (default), top-left, bottom-right or bottom-left
-//   SCOREBOARD_TIMEOUT  seconds a popup stays when the app doesn't say (default 5)
+//   ANNOUNCER_POSITION top-right (default), top-left, bottom-right or bottom-left
+//   ANNOUNCER_TIMEOUT  seconds a popup stays when the app doesn't say (default 5)
 //
-// IPC: birdland-scoreboard ipc call scoreboard <toggleDnd | setDnd BOOL | isDnd | dismissAll>
+// IPC: birdland-announcer ipc call announcer <toggleDnd | setDnd BOOL | isDnd | dismissAll>
 // Do not disturb drops all but critical notifications.
 ShellRoot {
     id: root
 
-    readonly property string position: ["top-right", "top-left", "bottom-right", "bottom-left"].includes(Env.get("SCOREBOARD_POSITION")) ? Env.get("SCOREBOARD_POSITION") : "top-right"
+    readonly property string position: ["top-right", "top-left", "bottom-right", "bottom-left"].includes(Env.get("ANNOUNCER_POSITION")) ? Env.get("ANNOUNCER_POSITION") : "top-right"
     readonly property bool atTop: position.startsWith("top")
     readonly property bool atLeft: position.endsWith("left")
-    readonly property int timeout: Math.max(1, Number(Env.get("SCOREBOARD_TIMEOUT", "5")) || 5) * 1000
+    readonly property int timeout: Math.max(1, Number(Env.get("ANNOUNCER_TIMEOUT", "5")) || 5) * 1000
     readonly property int maxPopups: 5
 
     property bool dnd: false
@@ -83,7 +83,7 @@ ShellRoot {
             // Below bars rather than over them.
             exclusionMode: ExclusionMode.Normal
 
-            WlrLayershell.namespace: "birdland-scoreboard"
+            WlrLayershell.namespace: "birdland-announcer"
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
@@ -111,7 +111,7 @@ ShellRoot {
     }
 
     IpcHandler {
-        target: "scoreboard"
+        target: "announcer"
 
         // Do not disturb on or off; returns the new state.
         function toggleDnd(): bool {

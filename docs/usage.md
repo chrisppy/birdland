@@ -58,7 +58,7 @@ Import the Home Manager module provided by the flake and enable the suite:
       interval = 30;                       # minutes between images from a folder
     };
 
-    scoreboard = {
+    announcer = {
       enable = true;
       position = "top-right";
       timeout = 5; # seconds
@@ -110,9 +110,9 @@ Import the Home Manager module provided by the flake and enable the suite:
 | `programs.birdland.outfield.interval` | integer | `30` | Minutes between images from a folder; `0` keeps the first. |
 | `programs.birdland.outfield.shuffle` | boolean | `true` | Random order instead of file-name order. |
 | `programs.birdland.outfield.fill` | enum | `"fill"` | `fill` (crop to cover), `fit`, `stretch`, `center` or `tile`. |
-| `programs.birdland.scoreboard.enable` | boolean | `false` | Enable the Scoreboard notification popups. |
-| `programs.birdland.scoreboard.position` | enum | `"top-right"` | Corner: `top-right`, `top-left`, `bottom-right` or `bottom-left`. |
-| `programs.birdland.scoreboard.timeout` | integer | `5` | Seconds a popup stays when the app doesn't say; critical ones stay. |
+| `programs.birdland.announcer.enable` | boolean | `false` | Enable the Announcer notification popups. |
+| `programs.birdland.announcer.position` | enum | `"top-right"` | Corner: `top-right`, `top-left`, `bottom-right` or `bottom-left`. |
+| `programs.birdland.announcer.timeout` | integer | `5` | Seconds a popup stays when the app doesn't say; critical ones stay. |
 | `programs.birdland.jumbotron.enable` | boolean | `false` | Enable the Jumbotron volume and brightness pop-ups. |
 | `programs.birdland.jumbotron.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.tarp.enable` | boolean | `false` | Enable the Tarp lock screen. Needs `systemd.enable`, or start it yourself. |

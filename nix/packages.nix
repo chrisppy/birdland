@@ -97,8 +97,8 @@
           wrapperArgs = imageFormats;
         };
         # Notification popups.
-        scoreboard = mkApp {
-          name = "scoreboard";
+        announcer = mkApp {
+          name = "announcer";
         };
         # Volume and brightness pop-ups.
         jumbotron = mkApp {
@@ -122,7 +122,7 @@
             dugout
             lineup
             outfield
-            scoreboard
+            announcer
             jumbotron
             tarp
           ];

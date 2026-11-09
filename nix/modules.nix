@@ -44,9 +44,7 @@
         ];
 
         # One island of the bar: a module, or modules sharing one pill.
-        bullpenIslands = lib.types.listOf (
-          lib.types.either bullpenModule (lib.types.listOf bullpenModule)
-        );
+        bullpenIslands = lib.types.listOf (lib.types.either bullpenModule (lib.types.listOf bullpenModule));
         # Islands as the bar reads them: comma-separated, modules in one joined
         # with "+".
         bullpenLayoutString = lib.concatMapStringsSep "," (

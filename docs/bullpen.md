@@ -5,8 +5,8 @@ and in what order. On side bars, left is the top and right the bottom. Any
 module can go in any part, a part can be empty (`[ ]`), and a module left out of
 all three isn't shown.
 
-The bar has no background: each entry is an island, a pill floating just off
-the screen edge. An entry is one module, or a list of modules that share a pill:
+The bar has no background: each entry is an island, a pill floating just off the
+screen edge. An entry is one module, or a list of modules that share a pill:
 
 ```nix
 right = [ "media" [ "cpu" "memory" "temperature" ] "weather" [ "network" "volume" "battery" ] "tray" "clock" ];

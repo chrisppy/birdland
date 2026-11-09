@@ -6,32 +6,32 @@ import modules.util
 Rectangle {
     id: root
 
-    // Screen edge the bar sits on. The pill is rounded on the side facing
-    // the screen, and runs vertically on left/right bars.
+    // Screen edge the bar sits on. The pill runs vertically on left/right
+    // bars.
     property string edge: "top"
     readonly property bool vertical: ScreenEdges.vertical(edge)
     // The monitor (Niri output name) whose workspaces to show; "" shows all.
     property string output: ""
-    // Sits flush against the screen edge, wherever it is in the bar.
-    readonly property bool hugsEdge: true
+    // Draws its own pill, so the bar puts no island around it when alone.
+    readonly property bool pill: true
 
     // Shows up to maxDots dots; the pill fits the dots shown.
     readonly property int maxDots: 11
     readonly property int dotSize: 15
-    // Thickness of the bar it sits in. The pill fills it but for a small gap on
-    // the side away from the screen edge, so it matches top/bottom and side bars.
-    property int barThickness: 30
-    readonly property int thickness: barThickness - 5
-    readonly property int length: (vertical ? dots.implicitHeight : dots.implicitWidth) + 2 * Theme.spacingMedium
+    // Thickness of the pill: the bar's island thickness, so it matches the
+    // other islands.
+    property int thickness: 24
+    // The end dots sit as far from the pill's ends as from its sides, so they
+    // follow its rounded ends.
+    readonly property real inset: (thickness - dotSize) / 2
+    readonly property int length: Math.ceil((vertical ? dots.implicitHeight : dots.implicitWidth) + 2 * inset)
 
-    color: Theme.surfaceAlt
+    color: Theme.backgroundAlt
+    border.color: Theme.surfaceAlt
+    border.width: 1
+    radius: thickness / 2
     implicitWidth: vertical ? thickness : length
     implicitHeight: vertical ? length : thickness
-
-    topLeftRadius: ScreenEdges.corner(edge, "topLeft", Theme.radiusMedium)
-    topRightRadius: ScreenEdges.corner(edge, "topRight", Theme.radiusMedium)
-    bottomLeftRadius: ScreenEdges.corner(edge, "bottomLeft", Theme.radiusMedium)
-    bottomRightRadius: ScreenEdges.corner(edge, "bottomRight", Theme.radiusMedium)
 
     Flow {
         id: dots
@@ -41,10 +41,10 @@ Rectangle {
 
         anchors {
             left: root.vertical ? undefined : parent.left
-            leftMargin: Theme.spacingMedium
+            leftMargin: root.inset
             verticalCenter: root.vertical ? undefined : parent.verticalCenter
             top: root.vertical ? parent.top : undefined
-            topMargin: Theme.spacingMedium
+            topMargin: root.inset
             horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
         }
 

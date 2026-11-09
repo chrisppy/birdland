@@ -78,7 +78,7 @@ it as you edit:
 just dev                               # enter the dev shell
 qs -p apps/bullpen                     # run an app
 BULLPEN_POSITION=left qs -p apps/bullpen
-BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu,volume qs -p apps/bullpen
+BULLPEN_LEFT=clock BULLPEN_CENTER=workspaces BULLPEN_RIGHT=cpu+memory,volume qs -p apps/bullpen   # "+" shares a pill
 BULLPEN_WEATHER_LOCATION=39.28,-76.62 qs -p apps/bullpen
 BULLPEN_RIGHT=feeds,clock qs -p apps/bullpen   # needs a paired pressbox
 LINEUP_FAVORITES=firefox,foot qs -p apps/lineup

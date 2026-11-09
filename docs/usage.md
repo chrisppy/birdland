@@ -33,7 +33,8 @@ Import the Home Manager module provided by the flake and enable the suite:
       layout = {
         left = [ "workspaces" ];
         center = [ "title" ];
-        right = [ "media" "cpu" "memory" "gpu" "temperature" "weather" "network" "volume" "microphone" "battery" "tray" "clock" ];
+        # A list is one island: modules sharing a pill
+        right = [ "media" [ "cpu" "memory" "gpu" "temperature" ] "weather" [ "network" "volume" "microphone" "battery" ] "tray" "clock" ];
       };
     };
 
@@ -89,9 +90,9 @@ Import the Home Manager module provided by the flake and enable the suite:
 | `programs.birdland.font.package` | package | `pkgs.inter` | Nix package for the font. |
 | `programs.birdland.bullpen.enable` | boolean | `false` | Enable the Bullpen status bar. |
 | `programs.birdland.bullpen.position` | enum | `"top"` | Screen edge (`top`, `bottom`, `left`, `right`). |
-| `programs.birdland.bullpen.layout.left` | list of modules | `[ "workspaces" ]` | Left part of the bar (top on side bars), in order. |
-| `programs.birdland.bullpen.layout.center` | list of modules | `[ "title" ]` | Center of the bar, in order. |
-| `programs.birdland.bullpen.layout.right` | list of modules | `[ "tray"  "clock" ]` | Right part of the bar (bottom on side bars), in order. |
+| `programs.birdland.bullpen.layout.left` | list of islands | `[ "workspaces" ]` | Left part of the bar (top on side bars), in order. An island is a module, or a list of modules sharing one pill. |
+| `programs.birdland.bullpen.layout.center` | list of islands | `[ "title" ]` | Center of the bar, in order. |
+| `programs.birdland.bullpen.layout.right` | list of islands | `[ "tray"  "clock" ]` | Right part of the bar (bottom on side bars), in order. |
 | `programs.birdland.bullpen.clock.format` | string | `"hh:mm dd MMM, yyyy"` | Clock on top/bottom bars, in [Qt's date format](https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method). |
 | `programs.birdland.bullpen.clock.verticalFormat` | string | time over date | Clock on side bars; each `\n` starts a new line. |
 | `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |

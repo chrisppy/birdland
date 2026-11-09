@@ -5,9 +5,18 @@ and in what order. On side bars, left is the top and right the bottom. Any
 module can go in any part, a part can be empty (`[ ]`), and a module left out of
 all three isn't shown.
 
+The bar has no background: each entry is an island, a pill floating just off
+the screen edge. An entry is one module, or a list of modules that share a pill:
+
+```nix
+right = [ "media" [ "cpu" "memory" "temperature" ] "weather" [ "network" "volume" "battery" ] "tray" "clock" ];
+```
+
+An island whose modules all have nothing to show hides. The workspaces dots are
+a pill of their own, so on their own they get no island around them.
+
 The center stays centered on the bar. A long window title is shortened with "…"
-to fit; outside the center it is capped at a quarter of the bar. The workspaces
-pill stays flush against the screen edge wherever it is placed.
+to fit; outside the center it is capped at a quarter of the bar.
 
 | Module | Shows | Needs |
 | :-------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |

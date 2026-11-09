@@ -13,16 +13,21 @@ PanelWindow {
     readonly property bool vertical: ScreenEdges.vertical(edge)
 
     // One line of text on top/bottom bars; room for the stacked clock on the sides.
-    readonly property int thickness: vertical ? 48 : 30
+    readonly property int thickness: vertical ? 48 : 34
+    // The bar has no background of its own: its modules sit in floating pills
+    // ("islands"), this far from the screen edge and this thick.
+    readonly property int islandGap: 6
+    readonly property int islandThickness: thickness - 10
 
-    // What goes in each part of the bar, in order: comma-separated names from
-    // `modules`, set with BULLPEN_LEFT, BULLPEN_CENTER and BULLPEN_RIGHT. On
-    // side bars, left is the top and right the bottom. An empty value leaves
-    // that part empty; unset uses the default.
-    readonly property var leftModules: Env.list("BULLPEN_LEFT", "workspaces")
-    readonly property var centerModules: Env.list("BULLPEN_CENTER", "title")
-    readonly property var rightModules: Env.list("BULLPEN_RIGHT", "media,cpu,memory,gpu,temperature,weather,network,volume,microphone,battery,tray,clock")
-    readonly property var allModules: leftModules.concat(centerModules, rightModules)
+    // What goes in each part of the bar, in order: comma-separated islands set
+    // with BULLPEN_LEFT, BULLPEN_CENTER and BULLPEN_RIGHT, each one name from
+    // `modules` or several joined with "+" to share a pill
+    // ("cpu+memory,clock"). On side bars, left is the top and right the
+    // bottom. An empty value leaves that part empty; unset uses the default.
+    readonly property var leftGroups: Env.groups("BULLPEN_LEFT", "workspaces")
+    readonly property var centerGroups: Env.groups("BULLPEN_CENTER", "title")
+    readonly property var rightGroups: Env.groups("BULLPEN_RIGHT", "media,cpu+memory+gpu+temperature,weather,network+volume+microphone+battery,tray,clock")
+    readonly property var allModules: [].concat(...leftGroups, ...centerGroups, ...rightGroups)
 
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
     readonly property bool imperial: Env.get("BULLPEN_UNITS").toLowerCase() === "imperial"
@@ -47,7 +52,7 @@ PanelWindow {
 
     implicitWidth: vertical ? thickness : 0
     implicitHeight: vertical ? 0 : thickness
-    // Transparent, so the screen shows through the panel's rounded corners.
+    // Transparent, so the screen shows around the islands.
     color: "transparent"
 
     anchors {
@@ -57,7 +62,9 @@ PanelWindow {
         right: edge !== "left"
     }
 
-    Rectangle {
+    // Lays out the three parts; draws nothing itself, so the screen shows
+    // between the islands.
+    Item {
         id: panel
 
         // Both sides get the size of the larger one, so the center part stays
@@ -65,15 +72,6 @@ PanelWindow {
         readonly property real sideSize: bar.vertical ? Math.max(leftSection.implicitHeight, rightSection.implicitHeight) : Math.max(leftSection.implicitWidth, rightSection.implicitWidth)
 
         anchors.fill: parent
-        color: Theme.background
-        border.color: Theme.border
-        border.width: 1
-
-        // Round the two corners on the side facing the screen.
-        topLeftRadius: ScreenEdges.corner(bar.edge, "topLeft", Theme.radiusXLarge)
-        topRightRadius: ScreenEdges.corner(bar.edge, "topRight", Theme.radiusXLarge)
-        bottomLeftRadius: ScreenEdges.corner(bar.edge, "bottomLeft", Theme.radiusXLarge)
-        bottomRightRadius: ScreenEdges.corner(bar.edge, "bottomRight", Theme.radiusXLarge)
 
         // left (top on side bars)
         Item {
@@ -87,15 +85,15 @@ PanelWindow {
                 top: parent.top
                 bottom: bar.vertical ? undefined : parent.bottom
                 right: bar.vertical ? parent.right : undefined
-                leftMargin: bar.vertical ? 0 : Theme.spacingMedium
-                topMargin: bar.vertical ? Theme.spacingMedium : 0
+                leftMargin: bar.vertical ? 0 : bar.islandGap
+                topMargin: bar.vertical ? bar.islandGap : 0
             }
 
             Section {
                 id: leftSection
 
                 owner: bar
-                names: bar.leftModules
+                groups: bar.leftGroups
 
                 anchors {
                     left: parent.left
@@ -125,7 +123,7 @@ PanelWindow {
                 id: centerSection
 
                 owner: bar
-                names: bar.centerModules
+                groups: bar.centerGroups
                 center: true
 
                 anchors.centerIn: parent
@@ -146,15 +144,15 @@ PanelWindow {
                 bottom: parent.bottom
                 top: bar.vertical ? undefined : parent.top
                 left: bar.vertical ? parent.left : undefined
-                rightMargin: bar.vertical ? 0 : Theme.spacingMedium
-                bottomMargin: bar.vertical ? Theme.spacingMedium : 0
+                rightMargin: bar.vertical ? 0 : bar.islandGap
+                bottomMargin: bar.vertical ? bar.islandGap : 0
             }
 
             Section {
                 id: rightSection
 
                 owner: bar
-                names: bar.rightModules
+                groups: bar.rightGroups
 
                 anchors {
                     right: parent.right
@@ -186,7 +184,7 @@ PanelWindow {
         id: workspacesModule
         Workspaces {
             edge: bar.edge
-            barThickness: bar.thickness
+            thickness: bar.islandThickness
             output: bar.screen?.name ?? ""
         }
     }

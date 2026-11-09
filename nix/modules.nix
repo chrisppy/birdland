@@ -43,6 +43,16 @@
           "feeds"
         ];
 
+        # One island of the bar: a module, or modules sharing one pill.
+        bullpenIslands = lib.types.listOf (
+          lib.types.either bullpenModule (lib.types.listOf bullpenModule)
+        );
+        # Islands as the bar reads them: comma-separated, modules in one joined
+        # with "+".
+        bullpenLayoutString = lib.concatMapStringsSep "," (
+          island: if lib.isList island then lib.concatStringsSep "+" island else island
+        );
+
         # A wallpaper image or folder: a Nix path (copied into the store) or a
         # string such as "~/Pictures/Wallpapers" (used where it is).
         wallpaperSource = lib.types.either lib.types.path lib.types.str;
@@ -55,25 +65,33 @@
               position = shared.edge "top" "Screen edge the Bullpen bar is attached to.";
               layout = {
                 left = lib.mkOption {
-                  type = lib.types.listOf bullpenModule;
+                  type = bullpenIslands;
                   default = [ "workspaces" ];
-                  description = "Modules in the left part of the bar (the top on side bars), in order.";
+                  description = ''
+                    Islands in the left part of the bar (the top on side bars), in order:
+                    a module name, or a list of modules sharing one pill.
+                  '';
                 };
                 center = lib.mkOption {
-                  type = lib.types.listOf bullpenModule;
+                  type = bullpenIslands;
                   default = [ "title" ];
-                  description = "Modules in the center of the bar, in order.";
+                  description = ''
+                    Islands in the center of the bar, in order: a module name, or a list
+                    of modules sharing one pill.
+                  '';
                 };
                 right = lib.mkOption {
-                  type = lib.types.listOf bullpenModule;
+                  type = bullpenIslands;
                   default = [
                     "tray"
                     "clock"
                   ];
                   description = ''
-                    Modules in the right part of the bar (the bottom on side bars), in
-                    order. Modules with nothing to show (no battery, no GPU sensor, no
-                    weather location, no media player, no tray icons) hide themselves.
+                    Islands in the right part of the bar (the bottom on side bars), in
+                    order: a module name, or a list of modules sharing one pill. Modules
+                    with nothing to show (no battery, no GPU sensor, no weather location,
+                    no media player, no tray icons) hide themselves, and so does an
+                    island whose modules are all hidden.
                   '';
                 };
               };
@@ -144,9 +162,9 @@
             };
             sessionVariables = {
               BULLPEN_POSITION = cfg.bullpen.position;
-              BULLPEN_LEFT = lib.concatStringsSep "," cfg.bullpen.layout.left;
-              BULLPEN_CENTER = lib.concatStringsSep "," cfg.bullpen.layout.center;
-              BULLPEN_RIGHT = lib.concatStringsSep "," cfg.bullpen.layout.right;
+              BULLPEN_LEFT = bullpenLayoutString cfg.bullpen.layout.left;
+              BULLPEN_CENTER = bullpenLayoutString cfg.bullpen.layout.center;
+              BULLPEN_RIGHT = bullpenLayoutString cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
               BULLPEN_CLOCK_FORMAT = cfg.bullpen.clock.format;
               BULLPEN_FEEDS_COMMAND = cfg.bullpen.feeds.command;
@@ -415,7 +433,7 @@
               # The feeds indicator's default click opens the default terminal.
               ++ (lib.optional (
                 cfg.bullpen.enable
-                && lib.elem "feeds" (with cfg.bullpen.layout; left ++ center ++ right)
+                && lib.elem "feeds" (lib.flatten (with cfg.bullpen.layout; left ++ center ++ right))
                 && lib.hasPrefix "xdg-terminal-exec " cfg.bullpen.feeds.command
               ) pkgs.xdg-terminal-exec);
 

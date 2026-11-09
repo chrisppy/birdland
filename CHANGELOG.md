@@ -43,8 +43,8 @@ Unreleased. Routine flake input updates and formatting commits are left out.
   [pressbox](https://github.com/chrisppy/pressbox) server. Click opens pressbox,
   right click refreshes every feed, and new items send a notification. Options:
   `programs.birdland.bullpen.feeds.{command,interval,notifications}`.
-- bullpen: a network indicator for systemd-networkd hosts, reading
-  `networkctl` and `/proc/net/wireless` when NetworkManager isn't present.
+- bullpen: a network indicator for systemd-networkd hosts, reading `networkctl`
+  and `/proc/net/wireless` when NetworkManager isn't present.
 - Birdland logo in the README.
 
 #### Changed
@@ -98,13 +98,12 @@ Unreleased. Routine flake input updates and formatting commits are left out.
 - Shared helpers in `modules/util` (`Env`, `JsonSettings`, `Screens`, `Apps`)
   and shared Nix options for the Home Manager and NixOS modules.
 - Nerd Font symbols are installed whenever Birdland is enabled.
-- Fewer flake lock nodes: `base24-themes` and `qml-niri` follow devfmt's
-  inputs.
+- Fewer flake lock nodes: `base24-themes` and `qml-niri` follow devfmt's inputs.
 
 #### Fixed
 
-- lineup: windows are matched to entries the same way running apps are, so
-  apps found by heuristic lookup show as running and appear once.
+- lineup: windows are matched to entries the same way running apps are, so apps
+  found by heuristic lookup show as running and appear once.
 - lineup: opening or closing a window no longer recreates every icon.
 - Home Manager: systemd `Environment=` values with spaces, quotes or `%` reach
   the apps intact.

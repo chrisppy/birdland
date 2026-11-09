@@ -130,9 +130,12 @@ Scope {
 
     Timer {
         interval: root.interval * 1000
-        running: root.running && root.configLoaded && root.token !== ""
+        running: root.running && root.configLoaded
         repeat: true
-        onTriggered: root.poll()
+        // Unpaired: the token file may not have existed when it was first
+        // read, and a missing file can't be watched, so look for it again.
+        // Its onLoaded polls, so pairing while the bar runs shows up here.
+        onTriggered: root.token === "" ? tokenView.reload() : root.poll()
     }
 
     // The server needs a moment to fetch after a refresh.
@@ -177,6 +180,8 @@ Scope {
     }
 
     FileView {
+        id: tokenView
+
         path: root.tokenFile
         watchChanges: true
         printErrors: false

@@ -83,7 +83,7 @@ Import the Home Manager module provided by the flake and enable the suite:
 ## Configuration Options
 
 | Option | Type | Default | Description |
-| :----------------------------------------------- | :--------------------- | :----------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| :----------------------------------------------- | :--------------------- | :------------------------------ | :--------------------------------------------------------------------------------------------------------------- |
 | `programs.birdland.enable` | boolean | `false` | Enable the Birdland Quickshell suite. |
 | `programs.birdland.systemd.enable` | boolean | `false` | Run suite components as user systemd services. |
 | `programs.birdland.theme.scheme` | theme name / attrs | `"birdland"` | Bundled base24-themes theme name, or a custom theme attribute set. |

@@ -66,8 +66,8 @@ layout to save power.
 The clock and date use Qt's date format, set with `clock.format` and
 `date.format`. The defaults, `hh:mm` and `dd MMM, yyyy`, show "17:24" and "01
 Nov, 2026"; `h:mm AP` shows "5:24 PM", and `yyyy-MM-dd` shows "2026-11-01". A
-clock format with seconds (`ss`) updates every second. The tray hides icons their apps mark as
-idle ("passive"), as Waybar does.
+clock format with seconds (`ss`) updates every second. The tray hides icons
+their apps mark as idle ("passive"), as Waybar does.
 
 The weather request sends only the configured coordinates to
 [Open-Meteo](https://open-meteo.com), every 15 minutes (a minute after a failed

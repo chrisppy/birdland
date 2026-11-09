@@ -94,5 +94,14 @@ Entering the shell generates the default theme into
 
 ## License
 
-This project is licensed under the **GPL-3.0-only** license. See the
-[LICENSE](./LICENSE) file for details.
+- The code is licensed under the **GPL-3.0-only** license. See the
+  [LICENSE](./LICENSE) file for details.
+- The logo (`docs/assets/birdland-mark.svg` and
+  `docs/assets/birdland-mark-light.svg`) is licensed under
+  [Creative Commons Attribution-ShareAlike 4.0](LICENSES/CC-BY-SA-4.0.txt).
+
+### Name and logo
+
+The birdland name and logo identify this project. The licenses above cover
+copyright, not trademarks: you're welcome to use the logo to refer to birdland,
+but forks and derived projects must use their own name and logo.

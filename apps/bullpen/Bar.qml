@@ -26,7 +26,7 @@ PanelWindow {
     // bottom. An empty value leaves that part empty; unset uses the default.
     readonly property var leftGroups: Env.groups("BULLPEN_LEFT", "workspaces")
     readonly property var centerGroups: Env.groups("BULLPEN_CENTER", "title")
-    readonly property var rightGroups: Env.groups("BULLPEN_RIGHT", "media,cpu+memory+gpu+temperature,weather,network+volume+microphone+battery,tray,clock")
+    readonly property var rightGroups: Env.groups("BULLPEN_RIGHT", "media,cpu+memory+gpu+temperature,weather,network+volume+microphone+battery,tray,clock+date")
     readonly property var allModules: [].concat(...leftGroups, ...centerGroups, ...rightGroups)
 
     // BULLPEN_UNITS=imperial shows °F; the default is metric.
@@ -36,6 +36,7 @@ PanelWindow {
             workspaces: workspacesModule,
             title: titleModule,
             clock: clockModule,
+            date: dateModule,
             cpu: cpuModule,
             memory: memoryModule,
             gpu: gpuModule,
@@ -218,10 +219,23 @@ PanelWindow {
             }
         }
     }
+    // The time and the date, each in Qt's date format: BULLPEN_CLOCK_FORMAT
+    // and BULLPEN_DATE_FORMAT on top/bottom bars, the _VERTICAL_FORMAT ones
+    // (where "\n" starts a new line) on side bars.
     Component {
         id: clockModule
         Clock {
             vertical: bar.vertical
+            horizontalFormat: Env.get("BULLPEN_CLOCK_FORMAT", "hh:mm")
+            verticalFormat: Env.get("BULLPEN_CLOCK_VERTICAL_FORMAT", "hh\\nmm")
+        }
+    }
+    Component {
+        id: dateModule
+        Clock {
+            vertical: bar.vertical
+            horizontalFormat: Env.get("BULLPEN_DATE_FORMAT", "dd MMM, yyyy")
+            verticalFormat: Env.get("BULLPEN_DATE_VERTICAL_FORMAT", "dd\\nMMM")
         }
     }
     Component {

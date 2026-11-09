@@ -24,7 +24,8 @@ Import the Home Manager module provided by the flake and enable the suite:
       enable = true;
       position = "top";
       units = "imperial";
-      clock.format = "h:mm AP  ddd MMM d"; # 12-hour time, US-style date
+      clock.format = "h:mm AP";  # 12-hour time
+      date.format = "ddd MMM d"; # US-style date
       weather = {
         latitude = 39.28;
         longitude = -76.62;
@@ -34,7 +35,7 @@ Import the Home Manager module provided by the flake and enable the suite:
         left = [ "workspaces" ];
         center = [ "title" ];
         # A list is one island: modules sharing a pill
-        right = [ "media" [ "cpu" "memory" "gpu" "temperature" ] "weather" [ "network" "volume" "microphone" "battery" ] "tray" "clock" ];
+        right = [ "media" [ "cpu" "memory" "gpu" "temperature" ] "weather" [ "network" "volume" "microphone" "battery" ] "tray" [ "clock" "date" ] ];
       };
     };
 
@@ -92,9 +93,11 @@ Import the Home Manager module provided by the flake and enable the suite:
 | `programs.birdland.bullpen.position` | enum | `"top"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.bullpen.layout.left` | list of islands | `[ "workspaces" ]` | Left part of the bar (top on side bars), in order. An island is a module, or a list of modules sharing one pill. |
 | `programs.birdland.bullpen.layout.center` | list of islands | `[ "title" ]` | Center of the bar, in order. |
-| `programs.birdland.bullpen.layout.right` | list of islands | `[ "tray"  "clock" ]` | Right part of the bar (bottom on side bars), in order. |
-| `programs.birdland.bullpen.clock.format` | string | `"hh:mm dd MMM, yyyy"` | Clock on top/bottom bars, in [Qt's date format](https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method). |
-| `programs.birdland.bullpen.clock.verticalFormat` | string | time over date | Clock on side bars; each `\n` starts a new line. |
+| `programs.birdland.bullpen.layout.right` | list of islands | `[ "tray" [ "clock" "date" ] ]` | Right part of the bar (bottom on side bars), in order. |
+| `programs.birdland.bullpen.clock.format` | string | `"hh:mm"` | Time on top/bottom bars, in [Qt's date format](https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method). |
+| `programs.birdland.bullpen.clock.verticalFormat` | string | `"hh\nmm"` | Time on side bars; each `\n` starts a new line. |
+| `programs.birdland.bullpen.date.format` | string | `"dd MMM, yyyy"` | Date on top/bottom bars, in Qt's date format. |
+| `programs.birdland.bullpen.date.verticalFormat` | string | `"dd\nMMM"` | Date on side bars; each `\n` starts a new line. |
 | `programs.birdland.bullpen.units` | enum | `"metric"` | Temperatures in °C (`metric`) or °F (`imperial`). |
 | `programs.birdland.bullpen.weather.latitude` | number or null | `null` | Weather location; the weather is hidden until both are set. |
 | `programs.birdland.bullpen.weather.longitude` | number or null | `null` | Weather location. |

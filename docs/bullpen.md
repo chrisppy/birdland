@@ -9,7 +9,7 @@ The bar has no background: each entry is an island, a pill floating just off the
 screen edge. An entry is one module, or a list of modules that share a pill:
 
 ```nix
-right = [ "media" [ "cpu" "memory" "temperature" ] "weather" [ "network" "volume" "battery" ] "tray" "clock" ];
+right = [ "media" [ "cpu" "memory" "temperature" ] "weather" [ "network" "volume" "battery" ] "tray" [ "clock" "date" ] ];
 ```
 
 An island whose modules all have nothing to show hides. The workspaces dots are
@@ -22,7 +22,8 @@ to fit; outside the center it is capped at a quarter of the bar.
 | :-------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
 | `title` | Focused window title, on its monitor's bar (top/bottom bars only) | Niri |
-| `clock` | Time and date | Nothing |
+| `clock` | Time | Nothing |
+| `date` | Date | Nothing |
 | `cpu`, `memory` | Usage | Nothing (`/proc`) |
 | `gpu` | Usage, and temperature when available | AMD, Intel (`i915`, `xe`): nothing (sysfs). NVIDIA: `nvidia-smi` |
 | `temperature` | CPU temperature | A hwmon sensor: `k10temp`, `zenpower`, `coretemp`... |
@@ -62,9 +63,10 @@ Intel GPU, so Intel + NVIDIA laptops leave the NVIDIA GPU asleep. On a machine
 whose only readable GPU is a discrete one that sleeps, leave `gpu` out of the
 layout to save power.
 
-The clock uses Qt's date format: the default `hh:mm dd MMM, yyyy` shows "17:24
-01 Nov, 2026", and `h:mm AP  ddd MMM d` shows "5:24 PM Sun Nov 1". A format with
-seconds (`ss`) updates every second. The tray hides icons their apps mark as
+The clock and date use Qt's date format, set with `clock.format` and
+`date.format`. The defaults, `hh:mm` and `dd MMM, yyyy`, show "17:24" and "01
+Nov, 2026"; `h:mm AP` shows "5:24 PM", and `yyyy-MM-dd` shows "2026-11-01". A
+clock format with seconds (`ss`) updates every second. The tray hides icons their apps mark as
 idle ("passive"), as Waybar does.
 
 The weather request sends only the configured coordinates to

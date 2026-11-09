@@ -29,6 +29,7 @@
           "workspaces"
           "title"
           "clock"
+          "date"
           "cpu"
           "memory"
           "gpu"
@@ -82,7 +83,10 @@
                   type = bullpenIslands;
                   default = [
                     "tray"
-                    "clock"
+                    [
+                      "clock"
+                      "date"
+                    ]
                   ];
                   description = ''
                     Islands in the right part of the bar (the bottom on side bars), in
@@ -96,20 +100,41 @@
               clock = {
                 format = lib.mkOption {
                   type = lib.types.str;
-                  default = "hh:mm dd MMM, yyyy";
-                  example = "h:mm AP  ddd MMM d";
+                  default = "hh:mm";
+                  example = "h:mm AP";
                   description = ''
-                    Clock on top/bottom bars, in Qt's date format
+                    Time on top/bottom bars, in Qt's date format
                     (<https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method>):
-                    `h:mm AP` is 12-hour time, `ddd MMM d` a US-style date.
+                    `HH:mm` is 24-hour time, `h:mm AP` 12-hour.
                   '';
                 };
                 verticalFormat = lib.mkOption {
                   type = lib.types.str;
-                  default = "hh\nmm\n\ndd\nMMM";
-                  example = "h\nmm\nAP\n\nMMM\nd";
+                  default = "hh\nmm";
+                  example = "h\nmm\nAP";
                   description = ''
-                    Clock on side bars, stacked: each line break (a newline, or `\n`)
+                    Time on side bars, stacked: each line break (a newline, or `\n`)
+                    starts a new line.
+                  '';
+                };
+              };
+              date = {
+                format = lib.mkOption {
+                  type = lib.types.str;
+                  default = "dd MMM, yyyy";
+                  example = "yyyy-MM-dd";
+                  description = ''
+                    Date on top/bottom bars, in Qt's date format
+                    (<https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method>):
+                    `yyyy-MM-dd` is ISO 8601, `ddd MMM d` US-style.
+                  '';
+                };
+                verticalFormat = lib.mkOption {
+                  type = lib.types.str;
+                  default = "dd\nMMM";
+                  example = "MMM\nd";
+                  description = ''
+                    Date on side bars, stacked: each line break (a newline, or `\n`)
                     starts a new line.
                   '';
                 };
@@ -165,6 +190,7 @@
               BULLPEN_RIGHT = bullpenLayoutString cfg.bullpen.layout.right;
               BULLPEN_UNITS = cfg.bullpen.units;
               BULLPEN_CLOCK_FORMAT = cfg.bullpen.clock.format;
+              BULLPEN_DATE_FORMAT = cfg.bullpen.date.format;
               BULLPEN_FEEDS_COMMAND = cfg.bullpen.feeds.command;
               BULLPEN_FEEDS_INTERVAL = toString cfg.bullpen.feeds.interval;
               BULLPEN_FEEDS_NOTIFICATIONS = lib.boolToString cfg.bullpen.feeds.notifications;
@@ -172,6 +198,9 @@
               BULLPEN_CLOCK_VERTICAL_FORMAT =
                 lib.replaceStrings [ "\n" ] [ "\\n" ]
                   cfg.bullpen.clock.verticalFormat;
+              BULLPEN_DATE_VERTICAL_FORMAT =
+                lib.replaceStrings [ "\n" ] [ "\\n" ]
+                  cfg.bullpen.date.verticalFormat;
             }
             //
               lib.optionalAttrs (cfg.bullpen.weather.latitude != null && cfg.bullpen.weather.longitude != null)

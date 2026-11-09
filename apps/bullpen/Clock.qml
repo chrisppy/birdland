@@ -2,18 +2,21 @@
 import QtQuick
 import Quickshell
 import modules.theme
-import modules.util
 
-// The time and date, in Qt's date format (doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method).
-// BULLPEN_CLOCK_FORMAT sets it for top/bottom bars and
-// BULLPEN_CLOCK_VERTICAL_FORMAT for side bars, where "\n" starts a new line.
+// The current time or date, in Qt's date format
+// (doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method). The bar uses it
+// for both the `clock` and `date` modules, with their own formats.
 Item {
     id: root
 
-    // Stack the time and date on side bars, where there is no room for one line.
+    // Side bars use verticalFormat, where there is no room for one line.
     property bool vertical: false
+    // Formats for top/bottom bars and for side bars; in the vertical one a
+    // line break or "\n" starts a new line.
+    property string horizontalFormat: "hh:mm"
+    property string verticalFormat: "hh\nmm"
 
-    readonly property string format: vertical ? Env.get("BULLPEN_CLOCK_VERTICAL_FORMAT", "hh\\nmm\\n\\ndd\\nMMM").replace(/\\n/g, "\n") : Env.get("BULLPEN_CLOCK_FORMAT", "hh:mm dd MMM, yyyy")
+    readonly property string format: vertical ? verticalFormat.replace(/\\n/g, "\n") : horizontalFormat
     // Wake up every second only for a format that shows seconds ("s" outside
     // quoted text).
     readonly property bool showsSeconds: /s/.test(format.replace(/'[^']*'/g, ""))

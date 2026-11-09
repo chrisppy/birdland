@@ -108,6 +108,7 @@ Import the Home Manager module provided by the flake and enable the suite:
 | `programs.birdland.lineup.enable` | boolean | `false` | Enable the Lineup favorite apps dock. |
 | `programs.birdland.lineup.position` | enum | `"bottom"` | Screen edge (`top`, `bottom`, `left`, `right`). |
 | `programs.birdland.lineup.favorites` | list of strings | `[]` | Desktop entry IDs of pinned apps in order. |
+| `programs.birdland.lineup.iconSize` | integer | `32` | Icon size: 16, 22, 24, 32, 48, 64, 96 or 128. The dock is the icon plus 12 px thick. |
 | `programs.birdland.outfield.enable` | boolean | `false` | Enable the Outfield wallpapers. |
 | `programs.birdland.outfield.wallpaper` | path / string or null | `null` | Image or folder for every monitor; `null` shows the theme background. |
 | `programs.birdland.outfield.outputs` | attrs of path / string | `{ }` | Per-monitor image or folder, by output name. |

@@ -13,6 +13,8 @@ Item {
     // Decides if a window's app ID belongs to an entry: (entry, appId) => bool.
     required property var matcher
     property string edge: "bottom"
+    // The icon's size; the slot adds room for the highlight and indicator.
+    property int iconSize: 32
     readonly property bool vertical: ScreenEdges.vertical(edge)
 
     // Open windows that belong to this app.
@@ -30,8 +32,8 @@ Item {
         windows[(current + 1) % windows.length].activate();
     }
 
-    implicitWidth: 44
-    implicitHeight: 44
+    implicitWidth: iconSize + 12
+    implicitHeight: iconSize + 12
 
     Rectangle {
         anchors.fill: parent
@@ -41,7 +43,7 @@ Item {
 
     IconImage {
         anchors.centerIn: parent
-        implicitSize: 32
+        implicitSize: root.iconSize
         asynchronous: true
         source: Quickshell.iconPath(root.entry.icon, "application-x-executable")
     }

@@ -17,6 +17,12 @@ PanelWindow {
     // Set with the LINEUP_FAVORITES environment variable.
     readonly property var favorites: Env.list("LINEUP_FAVORITES")
 
+    // Icon size in pixels, set with LINEUP_ICON_SIZE (default: 32). Each slot
+    // is the icon plus room for the hover highlight and running indicator,
+    // so the dock's thickness follows the icon size.
+    readonly property int iconSize: Math.max(16, Math.min(256, Number(Env.get("LINEUP_ICON_SIZE", "32")) || 32))
+    readonly property int itemSize: iconSize + 12
+
     // The desktop entries for the favorites. IDs that match no installed app
     // are skipped.
     readonly property var favoriteEntries: {
@@ -128,19 +134,20 @@ PanelWindow {
                     entry: modelData
                     edge: root.edge
                     matcher: root.matches
+                    iconSize: root.iconSize
                 }
             }
 
             // Divider between favorites and the other running apps.
             Item {
                 visible: root.favoriteEntries.length > 0 && root.runningEntries.length > 0
-                width: root.vertical ? 44 : 1
-                height: root.vertical ? 1 : 44
+                width: root.vertical ? root.itemSize : 1
+                height: root.vertical ? 1 : root.itemSize
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: root.vertical ? 28 : 1
-                    height: root.vertical ? 1 : 28
+                    width: root.vertical ? root.iconSize - 4 : 1
+                    height: root.vertical ? 1 : root.iconSize - 4
                     color: Theme.border
                 }
             }
@@ -159,6 +166,7 @@ PanelWindow {
                     entry: modelData
                     edge: root.edge
                     matcher: root.matches
+                    iconSize: root.iconSize
                 }
             }
         }

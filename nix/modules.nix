@@ -226,9 +226,29 @@
                 description = "Desktop entry IDs of the apps to show, in order.";
               };
               position = shared.edge "bottom" "Screen edge the Lineup dock is attached to.";
+              iconSize = lib.mkOption {
+                type = lib.types.enum [
+                  16
+                  22
+                  24
+                  32
+                  48
+                  64
+                  96
+                  128
+                ];
+                default = 32;
+                example = 48;
+                description = ''
+                  Icon size in pixels, from the sizes icon themes ship so icons stay
+                  sharp. The dock's thickness follows it: each slot is the icon plus
+                  12 pixels for the hover highlight and the running indicator.
+                '';
+              };
             };
             sessionVariables = {
               LINEUP_POSITION = cfg.lineup.position;
+              LINEUP_ICON_SIZE = toString cfg.lineup.iconSize;
               LINEUP_FAVORITES = lib.concatStringsSep "," cfg.lineup.favorites;
             };
           };

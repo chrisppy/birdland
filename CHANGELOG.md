@@ -14,8 +14,8 @@ Unreleased. Routine flake input updates and formatting commits are left out.
 
 - bullpen: a `dnd` module showing Announcer's do not disturb; click to switch
   it.
-- bullpen: an `idle-inhibitor` module; click to keep the session from idling
-  (no lock or screen off on idle). Also over IPC:
+- bullpen: an `idle-inhibitor` module; click to keep the session from idling (no
+  lock or screen off on idle). Also over IPC:
   `birdland-bullpen ipc call bullpen toggleIdleInhibitor`.
 
 #### Changed

@@ -19,7 +19,7 @@ The center stays centered on the bar. A long window title is shortened with "…
 to fit; outside the center it is capped at a quarter of the bar.
 
 | Module | Shows | Needs |
-| :-------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| :--------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
 | `workspaces` | Niri workspaces; click one to switch | Niri |
 | `title` | Focused window title, on its monitor's bar (top/bottom bars only) | Niri |
 | `clock` | Time | Nothing |

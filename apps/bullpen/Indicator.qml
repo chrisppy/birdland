@@ -40,7 +40,9 @@ Item {
 
         anchors.centerIn: parent
         columns: root.vertical ? 1 : 2
-        columnSpacing: Theme.spacingSmall
+        // Only between the icon and a label: Grid keeps the spacing for a
+        // hidden label, which would push a lone icon off center.
+        columnSpacing: root.label !== "" ? Theme.spacingSmall : 0
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter
 

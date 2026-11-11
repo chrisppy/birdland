@@ -8,6 +8,21 @@ Unreleased. Routine flake input updates and formatting commits are left out.
 
 ## Unreleased
 
+### 2026-11-11
+
+#### Added
+
+- bullpen: a `dnd` module showing Announcer's do not disturb; click to switch
+  it.
+- bullpen: an `idle-inhibitor` module; click to keep the session from idling
+  (no lock or screen off on idle). Also over IPC:
+  `birdland-bullpen ipc call bullpen toggleIdleInhibitor`.
+
+#### Changed
+
+- announcer: do not disturb is kept in `$XDG_RUNTIME_DIR`, so it survives
+  Announcer restarting and Bullpen can show and change it.
+
 ### 2026-11-09
 
 #### Added

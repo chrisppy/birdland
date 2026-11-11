@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import modules.theme
 import modules.util
 
@@ -48,7 +49,9 @@ PanelWindow {
             battery: batteryModule,
             tray: trayModule,
             media: mediaModule,
-            feeds: feedsModule
+            feeds: feedsModule,
+            dnd: dndModule,
+            "idle-inhibitor": idleInhibitorModule
         })
 
     implicitWidth: vertical ? thickness : 0
@@ -180,6 +183,18 @@ PanelWindow {
     // systemd-networkd's links, also shared.
     required property NetworkData networkd
     readonly property bool usesNetwork: allModules.includes("network")
+    // Announcer's do not disturb, also shared.
+    required property DoNotDisturb dnd
+    // Whether idle is inhibited, also shared.
+    required property IdleInhibit idle
+
+    // Every bar holds the session awake while idle is inhibited, so it keeps
+    // working as monitors come and go. Compositors usually honor inhibitors
+    // on panels such as the bar.
+    IdleInhibitor {
+        window: bar
+        enabled: bar.idle.inhibited
+    }
 
     Component {
         id: workspacesModule
@@ -318,6 +333,20 @@ PanelWindow {
         id: feedsModule
         Feeds {
             feeds: bar.feeds
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: dndModule
+        DoNotDisturbIndicator {
+            dnd: bar.dnd
+            vertical: bar.vertical
+        }
+    }
+    Component {
+        id: idleInhibitorModule
+        IdleIndicator {
+            idle: bar.idle
             vertical: bar.vertical
         }
     }

@@ -42,6 +42,8 @@
           "tray"
           "media"
           "feeds"
+          "dnd"
+          "idle-inhibitor"
         ];
 
         # One island of the bar: a module, or modules sharing one pill.

@@ -3,3 +3,4 @@ singleton ScreenEdges 1.0 ScreenEdges.qml
 singleton Env 1.0 Env.qml
 singleton Screens 1.0 Screens.qml
 JsonSettings 1.0 JsonSettings.qml
+DoNotDisturb 1.0 DoNotDisturb.qml

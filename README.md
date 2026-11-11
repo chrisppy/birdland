@@ -30,7 +30,8 @@ individually or as a complete suite:
   to any screen edge (`top`, `bottom`, `left`, `right`), with that monitor's
   workspaces, the focused window, a clock, the media player, tray icons, and
   status indicators for CPU, memory, GPU, temperature, weather, network, volume,
-  microphone and battery.
+  microphone and battery, plus toggles for do not disturb and keeping the
+  session awake.
 - **`dugout`**: A quick application launcher that opens on the focused monitor.
 - **`lineup`**: A dock of favorite and running apps on every monitor.
 - **[`outfield`](./docs/outfield.md)**: Wallpapers on every monitor: an image,

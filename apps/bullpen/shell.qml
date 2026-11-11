@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Networking
 import Niri
 import modules.util
@@ -32,6 +33,8 @@ ShellRoot {
             weather: sharedWeather
             feeds: sharedFeeds
             networkd: sharedNetworkd
+            dnd: sharedDnd
+            idle: sharedIdle
         }
     }
 
@@ -73,5 +76,36 @@ ShellRoot {
         id: sharedNetworkd
 
         running: Networking.backend === NetworkBackendType.None && sharedStats.barList.some(bar => bar.usesNetwork)
+    }
+
+    // Announcer's do not disturb, read from (and set through) its state file.
+    DoNotDisturb {
+        id: sharedDnd
+    }
+
+    // Idle inhibition, for the idle-inhibitor indicator and IPC. Starts off
+    // with each bullpen.
+    IdleInhibit {
+        id: sharedIdle
+    }
+
+    // birdland-bullpen ipc call bullpen <toggleIdleInhibitor | setIdleInhibitor BOOL | isIdleInhibited>
+    // Works whether or not the idle-inhibitor indicator is in the layout.
+    IpcHandler {
+        target: "bullpen"
+
+        // Idle inhibition on or off; returns the new state.
+        function toggleIdleInhibitor(): bool {
+            sharedIdle.toggle();
+            return sharedIdle.inhibited;
+        }
+
+        function setIdleInhibitor(on: bool): void {
+            sharedIdle.inhibited = on;
+        }
+
+        function isIdleInhibited(): bool {
+            return sharedIdle.inhibited;
+        }
     }
 }

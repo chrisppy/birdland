@@ -18,7 +18,8 @@ import modules.util
 //   ANNOUNCER_TIMEOUT  seconds a popup stays when the app doesn't say (default 5)
 //
 // IPC: birdland-announcer ipc call announcer <toggleDnd | setDnd BOOL | isDnd | dismissAll>
-// Do not disturb drops all but critical notifications.
+// Do not disturb drops all but critical notifications. Its state lives in a
+// file Bullpen's `dnd` indicator also reads and writes (see DoNotDisturb).
 ShellRoot {
     id: root
 
@@ -28,7 +29,12 @@ ShellRoot {
     readonly property int timeout: Math.max(1, Number(Env.get("ANNOUNCER_TIMEOUT", "5")) || 5) * 1000
     readonly property int maxPopups: 5
 
-    property bool dnd: false
+    DoNotDisturb {
+        id: dnd
+
+        owner: true
+    }
+
     // The monitor popups show on, chosen when the first of them arrives.
     property var screen: null
 
@@ -51,7 +57,7 @@ ShellRoot {
         persistenceSupported: false
 
         onNotification: notification => {
-            if (root.dnd && notification.urgency !== NotificationUrgency.Critical)
+            if (dnd.enabled && notification.urgency !== NotificationUrgency.Critical)
                 return; // untracked, so dropped
             if (trackedNotifications.values.length === 0)
                 root.screen = Screens.focused(niri);
@@ -115,16 +121,16 @@ ShellRoot {
 
         // Do not disturb on or off; returns the new state.
         function toggleDnd(): bool {
-            root.dnd = !root.dnd;
-            return root.dnd;
+            dnd.toggle();
+            return dnd.enabled;
         }
 
         function setDnd(on: bool): void {
-            root.dnd = on;
+            dnd.set(on);
         }
 
         function isDnd(): bool {
-            return root.dnd;
+            return dnd.enabled;
         }
 
         function dismissAll(): void {

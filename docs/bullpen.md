@@ -35,6 +35,8 @@ to fit; outside the center it is capped at a quarter of the bar.
 | `media` | The playing track; click plays/pauses, right click next, middle click previous | A player with MPRIS (most do) |
 | `tray` | Tray icons; click activates, right click opens the menu | Apps with StatusNotifierItem icons |
 | `feeds` | Unread items; click opens the reader, right click refreshes the feeds | A paired [pressbox](https://github.com/chrisppy/pressbox) client |
+| `dnd` | Announcer's do not disturb; click turns it on or off | [Announcer](./announcer.md) |
+| `idle-inhibitor` | Whether idle is inhibited; click keeps the session awake, or lets it idle | A compositor with idle-inhibit (Niri has it) |
 
 Modules with nothing to show (no battery, no GPU sensor, no weather location, no
 media player, no tray icons, no paired pressbox) hide themselves. Icons come
@@ -49,6 +51,25 @@ token from pressbox's own client files, `~/.config/pressbox/client.json`
 icon when everything is read, and a red `!` when the server can't be reached or
 rejects the token. With `feeds.notifications`, new items also send a
 notification (shown by Announcer, if you use it).
+
+The `dnd` indicator shows a dim bell while notifications show and a bright
+crossed-out bell while Announcer holds them back; click to switch. It is the
+same setting as `birdland-announcer ipc call announcer toggleDnd`, so a keybind
+and the bar stay in step. It stays hidden until Announcer has started in this
+session.
+
+The `idle-inhibitor` indicator is a coffee cup: dim while the session idles
+normally, bright while it is kept awake. While it is on, idle timeouts don't
+fire, so Tarp neither locks nor turns the monitors off on idle (locking before
+sleep and on `loginctl lock-session` still works). It starts off each time
+Bullpen starts. A keybind can switch it too, whether or not the indicator is in
+the layout:
+
+```sh
+birdland-bullpen ipc call bullpen toggleIdleInhibitor    # prints the new state
+birdland-bullpen ipc call bullpen setIdleInhibitor true
+birdland-bullpen ipc call bullpen isIdleInhibited
+```
 
 The `gpu` indicator uses the first GPU it can read: AMD (`gpu_busy_percent`),
 then Intel, then NVIDIA. Intel usage is the share of time the render engine is

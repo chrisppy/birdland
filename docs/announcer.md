@@ -14,3 +14,7 @@ birdland-announcer ipc call announcer toggleDnd    # prints the new state
 birdland-announcer ipc call announcer setDnd true
 birdland-announcer ipc call announcer dismissAll
 ```
+
+Bullpen's `dnd` indicator shows and switches the same setting. It is kept in
+`$XDG_RUNTIME_DIR/birdland-announcer.dnd`, so it lasts until you log out, even
+if Announcer restarts.

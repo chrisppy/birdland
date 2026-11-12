@@ -34,7 +34,7 @@ to fit; outside the center it is capped at a quarter of the bar.
 | `battery` | Charge and charging state | UPower: `services.upower.enable = true` in your NixOS config |
 | `media` | The playing track; click plays/pauses, right click next, middle click previous | A player with MPRIS (most do) |
 | `tray` | Tray icons; click activates, right click opens the menu | Apps with StatusNotifierItem icons |
-| `feeds` | Unread items; click opens the reader, right click refreshes the feeds | A paired [pressbox](https://github.com/chrisppy/pressbox) client |
+| `feeds` | Unread items; click opens the reader, right click refreshes the feeds | A paired [pressbox](https://github.com/red-oxide/pressbox) client |
 | `dnd` | Announcer's do not disturb; click turns it on or off | [Announcer](./announcer.md) |
 | `idle-inhibitor` | Whether idle is inhibited; click keeps the session awake, or lets it idle | A compositor with idle-inhibit (Niri has it) |
 
@@ -43,7 +43,7 @@ media player, no tray icons, no paired pressbox) hide themselves. Icons come
 from the Symbols Nerd Font, which the Home Manager module installs.
 
 The `feeds` indicator shows unread items on a
-[pressbox](https://github.com/chrisppy/pressbox) server. It reads the server and
+[pressbox](https://github.com/red-oxide/pressbox) server. It reads the server and
 token from pressbox's own client files, `~/.config/pressbox/client.json`
 (written by pressbox's Home Manager module) and the token saved by
 `pressbox pair`, so there is nothing to set up in Birdland beyond adding

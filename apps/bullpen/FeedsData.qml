@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import modules.util
 
-// Unread counts from a pressbox feed server (github.com/chrisppy/pressbox),
+// Unread counts from a pressbox feed server (github.com/red-oxide/pressbox),
 // shared by every bar's feeds indicator. The server and token come from the
 // reader's own files: ~/.config/pressbox/client.json (written by pressbox's
 // Home Manager module) and the token `pressbox pair` saves. Polls every

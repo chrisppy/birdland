@@ -11,7 +11,7 @@ A modular, highly customizable desktop shell suite built with
 [Quickshell](https://github.com/outfoxxed/quickshell) and managed entirely
 through Nix Flakes and Home Manager. Designed with native support for the
 [Niri](https://github.com/YaLTeR/niri) compositor and dynamically themed via
-[base24-themes](https://github.com/chrisppy/base24-themes).
+[base24-themes](https://github.com/red-oxide/base24-themes).
 
 > [!NOTE]
 > Birdland is in its early days. Expect rough edges, and options and behavior
@@ -60,7 +60,7 @@ Add Birdland as an input to your `flake.nix`:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     
-    birdland.url = "github:chrisppy/birdland";
+    birdland.url = "github:red-oxide/birdland";
     # birdland.inputs.base24-themes.follows = "base24-themes";
   };
 

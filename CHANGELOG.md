@@ -55,7 +55,7 @@ Unreleased. Routine flake input updates and formatting commits are left out.
 #### Added
 
 - bullpen: a `feeds` module showing the unread count from a
-  [pressbox](https://github.com/chrisppy/pressbox) server. Click opens pressbox,
+  [pressbox](https://github.com/red-oxide/pressbox) server. Click opens pressbox,
   right click refreshes every feed, and new items send a notification. Options:
   `programs.birdland.bullpen.feeds.{command,interval,notifications}`.
 - bullpen: a network indicator for systemd-networkd hosts, reading `networkctl`

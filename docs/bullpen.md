@@ -43,8 +43,8 @@ media player, no tray icons, no paired pressbox) hide themselves. Icons come
 from the Symbols Nerd Font, which the Home Manager module installs.
 
 The `feeds` indicator shows unread items on a
-[pressbox](https://github.com/red-oxide/pressbox) server. It reads the server and
-token from pressbox's own client files, `~/.config/pressbox/client.json`
+[pressbox](https://github.com/red-oxide/pressbox) server. It reads the server
+and token from pressbox's own client files, `~/.config/pressbox/client.json`
 (written by pressbox's Home Manager module) and the token saved by
 `pressbox pair`, so there is nothing to set up in Birdland beyond adding
 `"feeds"` to a layout. It stays hidden until the machine is paired, shows a dim

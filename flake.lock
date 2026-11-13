@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794495726,
-        "narHash": "sha256-NwEdjOOAOUX75iyztW0tsF718//x7aF6bWMTmR+5PS4=",
+        "lastModified": 1794555283,
+        "narHash": "sha256-WYUQ9FbzDYV3lEhxN5yTmeUaVCjoC+uHwNm+Hpvlek8=",
         "owner": "red-oxide",
         "repo": "base24-themes",
-        "rev": "ad83c0bfe9cc8e6073cfcc8a7143b5622206fdc9",
+        "rev": "68277c5a57be196eb0c2b7c69ed774a3f462feb5",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794495672,
-        "narHash": "sha256-kRl5FQD7ykCP24Tzkqdm4jyaW0bwfQYcYEAFnv/Nm1U=",
+        "lastModified": 1794500337,
+        "narHash": "sha256-SRoTX/OGvU7V/pJXb8BVtraMXl27y2E+NQcjNbYD2L4=",
         "owner": "red-oxide",
         "repo": "devfmt",
-        "rev": "ef2d3d07495f470e58aff7c41e108ee4fe1a4a6d",
+        "rev": "fe8387990390ae005bf5dbb3bc11695d730e694a",
         "type": "github"
       },
       "original": {
